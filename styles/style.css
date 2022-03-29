@@ -1,0 +1,104 @@
+.a-modal {
+    display: none!important;
+}
+body {
+	text-align: center;
+	font-size: 24px;
+	font-family: 'Playfair Display SC', serif;
+
+}
+
+.header {
+	position: relative;
+	margin: 0;
+	background:  #ec5aa3;
+	color: white;
+}
+
+.title, .subtitle {
+
+	font-family: 'Great Vibes', cursive;
+	cursor: pointer;
+}
+
+.title {
+	font-size: 75px;
+	letter-spacing: 2px;
+	text-shadow: 3px 3px 2px black;
+}
+
+.subtitle {
+	font-size: 34px;
+	letter-spacing: 1px;
+}
+
+.container{
+	position: relative;
+	border: 15px solid;
+	border-top-width: 0px;
+	border-color: #ec5aa3;
+	margin: 0px 180px 50px 180px;
+	border-bottom-left-radius: 800px;
+	border-bottom-right-radius: 800px;
+	background-color: transparent;
+}
+
+.content {
+	position: relative;
+	margin: 15px;
+	background-color: transparent;
+}
+
+p {
+	color: black;
+	font-variant: small-caps;
+	line-height: 3;
+}
+
+img {
+
+	display: block;
+	width: 100%;
+	border-bottom-left-radius: 800px;
+	border-bottom-right-radius: 800px;
+}
+
+.overlay {
+	position: absolute;
+	top: 0;
+  	bottom: 0;
+  	left: 0;
+  	right: 0;
+  	height: 100%;
+ 	width: 100%;
+  	opacity: 0;
+  	transition: .7s ease;
+  	background-color: transparent;
+  	border-bottom-left-radius: 800px;
+  	border-bottom-right-radius: 800px;
+}
+
+.content:hover .overlay {
+	opacity: 1;
+}
+
+.content:hover img {
+	filter: blur(5px);
+}
+
+.text {
+	position: absolute;
+	color: black;
+  	font-size: 30px;
+  	top: 50%;
+  	left: 50%;
+  	transform: translate(-50%, -50%);
+  	-ms-transform: translate(-50%, -50%);
+}
+
+.redlight {
+	position: relative;
+  	height: 100%;
+  	width: 100%;
+  	transition: 1s ease;
+}
