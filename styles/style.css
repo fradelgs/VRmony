@@ -1,6 +1,7 @@
 html,body {
 	position: fixed;
-	font-family: 'Playfair Display SC', serif;
+	/* font-family: 'Playfair Display SC', serif; */
+	font-family: 'Sofia', serif;
 	top:0;
     bottom:0;
     left:0;
@@ -83,9 +84,6 @@ img {
 }
 
 #book:hover ~ #overlay {
-	filter: blur(5px);
-	transition: 1s ease;
-
 	filter: saturate(0%);
 	transition: 1s ease;
 }
