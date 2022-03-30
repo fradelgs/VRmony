@@ -1,112 +1,91 @@
-.a-modal {
-    display: none!important;
-}
-
-body {
-	font-size: 30px;
+html,body {
+	position: fixed;
 	font-family: 'Playfair Display SC', serif;
+	top:0;
+    bottom:0;
+    left:0;
+    right:0;
 	margin: 0;
-    padding: 0;
+	padding: 0;
 }
 
-.container {
-	background-repeat: no-repeat;
-	position: relative;
-	background-color: transparent;
-}
-
-.content {
-	position: relative;
-	margin: 0;
-	background-color: transparent;
-}
-
-.header {
+#header {
 	position: absolute;
+	z-index: 5;
+	top: 3vw;
+  	left: 5vw;
 	height: fit-content;
-    width: fit-content;
-	top: 6%;
-  	left: 6%;
-	margin: 0;
+	width: fit-content;
 	background-color: transparent;
-	color: rgb(255, 255, 255);
-	transform: scale(100%, 100%);
-	-ms-transform: scale(50%, 50%);
-}
-
-.title, .subtitle {
+	color: whitesmoke;
 	font-family: 'Great Vibes', cursive;
 	text-shadow: 3px 3px 2px black;
 	text-align: center;
 	cursor: pointer;
-	margin: 0;
-    padding: 0;
 }
+#title {font-size: 6vw;}
+#subtitle {font-size: 2vw;}
 
-.title {
-	font-size: 4.5em;
+#overlay {
+	z-index: 2;
+	filter: blur(0px);
+	transition: 1s ease;
+	filter: saturate(100%);
+	transition: 1s ease;
 }
-
-.subtitle {
-	font-size: 2em;
-}
-
-/* p {
-	color: black;
-	font-variant: small-caps;
-	line-height: 3;
-} */
 
 img {
+	z-index: 1;
 	display: block;
 	height:100%;
 	width: 100%;
 }
 
-.book{
+#book{
 	position: absolute;
-	top: 30%;
-	left: 10%;
-	height: 30%;
-	width: 15%;
-	!!! rotate: x 35deg; !!!
+	z-index: 3;
+	top: 15vw;
+	left: 18vw;
+	height: 30vw;
+	width: 20vw;
+	transform: rotate(-20deg);
+	cursor: pointer;
 	background-color: rgb(197, 50, 141);
-}
-
-.overlay {
-	position: absolute;
-	top: 0;
-  	bottom: 0;
-  	left: 0;
-  	right: 0;
-  	height: 100%;
- 	width: 100%;
-  	opacity: 0;
-  	transition: .7s ease;
-  	background-color: transparent;
-}
-
-.book:hover .overlay {
-	opacity: 1;
-}
-
-.book:hover img {
 	filter: blur(5px);
+	transition: 1s ease;
 }
 
-.text {
+#text {
 	position: absolute;
+	z-index: 4;
 	color: black;
-  	font-size: 30px;
-  	top: 50%;
-  	left: 50%;
-  	transform: translate(-50%, -50%);
-  	-ms-transform: translate(-50%, -50%);
+  	font-size: 2vw;
+  	top: 28vw;
+  	left: 40vw;
+	height: fit-content;
+	width: fit-content;
+	text-align: center;
+	opacity: 0;
+	transition: 1s ease;
 }
 
-.redlight {
-	position: relative;
-  	height: 100%;
-  	width: 100%;
-  	transition: 1s ease;
+#book:hover {
+	filter: blur(0px);
+	-webkit-transform: rotateZ(-10deg);
+	-ms-transform: rotateZ(-10deg);
+	transform: rotateZ(-10deg);
+	transition: 1s ease;
+}
+
+#book:hover + #text {
+	opacity: 1;
+	transition: 1s ease;
+}
+
+#book:hover ~ #overlay {
+	filter: blur(5px);
+	transition: 1s ease;
+
+	filter: saturate(0%);
+	transition: 1s ease;
 }

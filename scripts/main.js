@@ -1,10 +1,10 @@
-const myTitle = document.querySelector('p');
-myTitle.textContent = 'Pssst... Hey, you!';
+// const myTitle = document.querySelector('p');
+// myTitle.textContent = 'Pssst... Hey, you!';
 
 
 var audio = new Audio('audio/lets-get-it-on.m4a');
 
-document.querySelector(".overlay").style.cursor = "pointer";
+document.querySelector('.overlay').style.cursor = "pointer";
 
 document.querySelector('.overlay').onclick = function() {
  lets_play();
