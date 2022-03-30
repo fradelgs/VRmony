@@ -1,66 +1,76 @@
 .a-modal {
     display: none!important;
 }
+
 body {
-	text-align: center;
-	font-size: 24px;
+	font-size: 30px;
 	font-family: 'Playfair Display SC', serif;
-
-}
-
-.header {
-	position: relative;
 	margin: 0;
-	background:  #ec5aa3;
-	color: white;
+    padding: 0;
 }
 
-.title, .subtitle {
-
-	font-family: 'Great Vibes', cursive;
-	cursor: pointer;
-}
-
-.title {
-	font-size: 75px;
-	letter-spacing: 2px;
-	text-shadow: 3px 3px 2px black;
-}
-
-.subtitle {
-	font-size: 34px;
-	letter-spacing: 1px;
-}
-
-.container{
+.container {
+	background-repeat: no-repeat;
 	position: relative;
-	border: 15px solid;
-	border-top-width: 0px;
-	border-color: #ec5aa3;
-	margin: 0px 180px 50px 180px;
-	border-bottom-left-radius: 800px;
-	border-bottom-right-radius: 800px;
 	background-color: transparent;
 }
 
 .content {
 	position: relative;
-	margin: 15px;
+	margin: 0;
 	background-color: transparent;
 }
 
-p {
+.header {
+	position: absolute;
+	height: fit-content;
+    width: fit-content;
+	top: 6%;
+  	left: 6%;
+	margin: 0;
+	background-color: transparent;
+	color: rgb(255, 255, 255);
+	transform: scale(100%, 100%);
+	-ms-transform: scale(50%, 50%);
+}
+
+.title, .subtitle {
+	font-family: 'Great Vibes', cursive;
+	text-shadow: 3px 3px 2px black;
+	text-align: center;
+	cursor: pointer;
+	margin: 0;
+    padding: 0;
+}
+
+.title {
+	font-size: 4.5em;
+}
+
+.subtitle {
+	font-size: 2em;
+}
+
+/* p {
 	color: black;
 	font-variant: small-caps;
 	line-height: 3;
-}
+} */
 
 img {
-
 	display: block;
+	height:100%;
 	width: 100%;
-	border-bottom-left-radius: 800px;
-	border-bottom-right-radius: 800px;
+}
+
+.book{
+	position: absolute;
+	top: 30%;
+	left: 10%;
+	height: 30%;
+	width: 15%;
+	!!! rotate: x 35deg; !!!
+	background-color: rgb(197, 50, 141);
 }
 
 .overlay {
@@ -74,15 +84,13 @@ img {
   	opacity: 0;
   	transition: .7s ease;
   	background-color: transparent;
-  	border-bottom-left-radius: 800px;
-  	border-bottom-right-radius: 800px;
 }
 
-.content:hover .overlay {
+.book:hover .overlay {
 	opacity: 1;
 }
 
-.content:hover img {
+.book:hover img {
 	filter: blur(5px);
 }
 

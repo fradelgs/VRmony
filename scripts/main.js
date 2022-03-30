@@ -11,7 +11,7 @@ document.querySelector('.overlay').onclick = function() {
 }
 
 function lets_play(){
-	var zone = document.querySelector('.redlight');
+	var zone = document.querySelector('.container');
 	if (zone.style.boxShadow == "none") {
 		zone.style.boxShadow = "0px 200px 400px red inset";
 		zone.style.filter = "brightness(85%)";
