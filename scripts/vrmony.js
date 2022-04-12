@@ -522,7 +522,6 @@ function init(){
 	window.addEventListener( 'resize', onWindowResize );
 	document.body.appendChild( VRButton.createButton( renderer ) );
 	db.collection("state").doc("counter").onSnapshot(db_callback);
-	
 }
 
 function onWindowResize() {
@@ -540,11 +539,9 @@ function db_callback(doc) {
 	}
 
 	console.log(doc)
-
 }
 
 function changeState(Object){
-	
 	if (Object.userData[0].MODEL==false) {
 		Object.userData[0].MODEL= true;
 		myRender(Object);	
@@ -570,8 +567,6 @@ function myRender(Object){
 	if(Object.children[0]) Object.children[0].gain.gain.setTargetAtTime(Object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
 }
 
-
-
 function mouseDown(event) {
 	// find intersections
 	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -594,7 +589,6 @@ function mouseDown(event) {
 }
 
 function animate() {
-
 	requestAnimationFrame( animate );
 	renderer.render( scene, camera );
 	stats.update();
