@@ -1,24 +1,30 @@
-// const myTitle = document.querySelector('p');
-// myTitle.textContent = 'Pssst... Hey, you!';
-
+type = "text/javascript";
 
 var audio = new Audio('audio/lets-get-it-on.m4a');
+var book = document.getElementById('book');
 
-document.querySelector('.overlay').style.cursor = "pointer";
-
-document.querySelector('.overlay').onclick = function() {
- lets_play();
-}
+book.onmouseover = function() {lets_play()};
+book.onmouseleave = function() {dont_play()};
+book.setAttribute('onclick', 'location.href = "vrmony.html"');
+// book.setAttribute('onclick', 'location.href = "vr-mony-session.html"');
+// book.onclick = function() {enterapp()};
 
 function lets_play(){
-	var zone = document.querySelector('.container');
-	if (zone.style.boxShadow == "none") {
-		zone.style.boxShadow = "0px 200px 400px red inset";
-		zone.style.filter = "brightness(85%)";
+	if (audio.paused == true) {
 		audio.play();
-	} else {
-		zone.style.boxShadow = "none";
-		zone.style.filter = "brightness(100%)";
+	}
+}
+
+function dont_play(){
+	if (audio.paused == false) {
 		audio.pause();
 	}
 }
+
+// function enterapp(){
+//     var script = document.createElement("script");
+//     script.type = "text/javascript";
+//     script.src = "scripts/vrmony.js"; 
+//     document.getElementsByTagName("head")[0].appendChild(script);
+//     return false;
+// }
