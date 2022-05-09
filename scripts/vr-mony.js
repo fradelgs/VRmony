@@ -1,10 +1,10 @@
-import * as THREE from 'libs/three/three.module.js';
-import { VRButton } from 'libs/VRButton.js';
+import * as THREE from '/libs/three/three.module.js';
+import { VRButton } from '/libs/VRButton.js';
 // import { VRButton } from 'https://unpkg.com/three/examples/jsm/webxr/VRButton.js';
-import { XRControllerModelFactory } from 'libs/three/jsm/XRControllerModelFactory.js';
-import { Stats } from 'libs/stats.module.js';
-import { OrbitControls } from 'libs/three/jsm/OrbitControls.js';
-import { CannonHelper } from 'libs/CannonHelper.js';
+import { XRControllerModelFactory } from '/libs/three/jsm/XRControllerModelFactory.js';
+import { Stats } from '/libs/stats.module.js';
+import { OrbitControls } from '/libs/three/jsm/OrbitControls.js';
+import { CannonHelper } from '/libs/CannonHelper.js';
 
 class Vrmony{
 	constructor(){
