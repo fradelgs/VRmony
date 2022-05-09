@@ -1,4 +1,4 @@
-import * as THREE from 'libs/three/three.module.js';
+import * as THREE from './libs/three/three.module.js';
 import { VRButton } from 'libs/VRButton.js';
 // import { VRButton } from 'https://unpkg.com/three/examples/jsm/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'libs/three/jsm/XRControllerModelFactory.js';
