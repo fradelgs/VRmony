@@ -1,5 +1,5 @@
-## VR-mony
- # A platonic solid love experience.
+# VR-mony
+## A platonic solid love experience.
 
 
 Color Picker Tool - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Colors/Color_picker_tool
