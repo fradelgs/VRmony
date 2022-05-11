@@ -1,7 +1,7 @@
 html,body {
 	position: fixed;
 	/* font-family: 'Playfair Display SC', serif; */
-	font-family: 'Sofia', serif;
+	/* font-family: 'Sofia', serif; */
 	top:0;
     bottom:0;
     left:0;
@@ -60,6 +60,7 @@ img {
 	position: absolute;
 	z-index: 4;
 	color: black;
+	font-family: 'Sofia', serif;
   	font-size: 2vw;
   	top: 28vw;
   	left: 40vw;
