@@ -1,6 +1,7 @@
 import * as THREE from './libs/three/three.module.js';
 import { VRButton } from './libs/VRButton.js';
 // import { VRButton } from 'https://unpkg.com/three/examples/jsm/webxr/VRButton.js';
+// import { VRButton } from './libs/three/jsm/VRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { Stats } from './libs/stats.module.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
@@ -68,8 +69,8 @@ class Vrmony{
     initScene(){
         
         //Create a marker to indicate where the joint is
-        const geometry = new THREE.SphereBufferGeometry( 0.1, 8, 8 );
-        const material = new THREE.MeshStandardMaterial({ color: 0xaa0000 });
+        const geometry = new THREE.SphereBufferGeometry( 0.03, 8, 8 );
+        const material = new THREE.MeshStandardMaterial({ color: 0xE81D02 });
         this.marker = new THREE.Mesh( geometry, material );
         this.marker.visible = false;
         this.scene.add(this.marker);
