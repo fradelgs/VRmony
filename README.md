@@ -7,6 +7,8 @@ Color Picker Tool - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Colors/
 <br>
 Font - https://www.dafont.com/it/ - https://fonts.google.com/
 <br>
+Font Awesome - https://fontawesome.com/v5/cheatsheet
+<br>
 
 Web Audio API - https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
 <br>
