@@ -1,9 +1,3 @@
-/**
- * @author mrdoob / http://mrdoob.com
- * @author Mugen87 / https://github.com/Mugen87
- * @author NikLever / http://niklever.com
- */
-
 class VRButton{
 
 	constructor( renderer, options ) {
@@ -23,7 +17,7 @@ class VRButton{
 
 			const button = document.createElement( 'button' );
 			button.style.display = 'none';
-            button.style.height = '40px';
+            button.style.height = '40px';            
             
 			navigator.xr.isSessionSupported( this.sessionMode ).then( ( supported ) => {
 
@@ -66,21 +60,21 @@ class VRButton{
 
     }
 
-	showEnterVR( button ) {
+	showEnterVR( button, ) {
 
         let currentSession = null;
         const self = this;
         
-        this.stylizeElement( button, true, 30, true );
+        this.stylizeElement( button, true, 20, true );
         
         function onSessionStarted( session ) {
 
             session.addEventListener( 'end', onSessionEnded );
 
             self.renderer.xr.setSession( session );
-            self.stylizeElement( button, false, 12, true );
+            self.stylizeElement( button, false, 20, true );
             
-            button.textContent = 'EXIT VR';
+            button.innerHTML = '<i class="fa-solid fa-door-closed"></i>';
 
             currentSession = session;
             
@@ -92,8 +86,8 @@ class VRButton{
 
             currentSession.removeEventListener( 'end', onSessionEnded );
 
-            self.stylizeElement( button, true, 12, true );
-            button.textContent = 'ENTER VR';
+            self.stylizeElement( button, true, 20, true );
+            button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>'; 
 
             currentSession = null;
             
@@ -104,11 +98,12 @@ class VRButton{
         //
 
         button.style.display = '';
-        button.style.right = '20px';
+        button.style.right = '30px';
+        button.style.bottom = '30px';
         button.style.width = '80px';
         button.style.cursor = 'pointer';
-        button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
-        
+        // button.innerHTML = '<i class="fa-solid fa-door-closed"></i>';
+        button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>';        
 
         button.onmouseenter = function () {
             
@@ -120,8 +115,9 @@ class VRButton{
 
         button.onmouseleave = function () {
             
-            button.style.fontSize = '30px'; 
-            button.innerHTML = '<i class="fas fa-vr-cardboard"></i>';
+            button.style.fontSize = '20px'; 
+            button.innerHTML = (currentSession===null) ? '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>' : '<i class="fa-solid fa-door-open"></i>';
+            
             button.style.opacity = '0.5';
 
         };
@@ -172,23 +168,21 @@ class VRButton{
         button.style.bottom = '0px';
         button.style.border = '';
         button.style.opacity = '1';
-        button.style.fontSize = '13px';
+        button.style.fontSize = '10px';
         button.textContent = 'VR NOT SUPPORTED';
-        
-        
 
     }
 
-    stylizeElement( element, active = true, fontSize = 13, ignorePadding = false ) {
+    stylizeElement( element, active = true, fontSize = 20, ignorePadding = false ) {
 
         element.style.position = 'absolute';
-        element.style.bottom = '20px';
+        element.style.bottom = '30px';
         if (!ignorePadding) element.style.padding = '12px 6px';
-        element.style.border = '1px solid #fff';
+        element.style.border = '3px solid #0a0a0a';
         element.style.borderRadius = '4px';
-        element.style.background = (active) ? 'rgba(20,150,80,1)' : 'rgba(180,20,20,1)';
-        element.style.color = '#fff';
-        element.style.font = `normal ${fontSize}px sans-serif`;
+        element.style.background = (active) ? 'rgba(1,135,0,1)' : 'rgba(180,20,20,1)';
+        element.style.color = '#0a0a0a';
+        element.style.font = `bold ${fontSize}px sans-serif`;
         element.style.textAlign = 'center';
         element.style.opacity = '0.5';
         element.style.outline = 'none';
