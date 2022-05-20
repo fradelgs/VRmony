@@ -64,6 +64,8 @@ class Vrmony{
         this.origin = new THREE.Vector3();
         
         window.addEventListener('resize', this.resize.bind(this) );
+
+        console.log(this.controller);
 	}	
     
     initScene(){
@@ -264,6 +266,8 @@ class Vrmony{
         this.helper.update( );
         this.renderer.render( this.scene, this.camera );
     }
+
+    
 }
 
 export { Vrmony };
