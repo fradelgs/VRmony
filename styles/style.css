@@ -10,7 +10,7 @@ html,body {
 	padding: 0;
 }
 
-#header {
+/* #header {
 	position: absolute;
 	z-index: 5;
 	top: 3vw;
@@ -25,7 +25,7 @@ html,body {
 	cursor: pointer;
 }
 #title {font-size: 6vw;}
-#subtitle {font-size: 2vw;}
+#subtitle {font-size: 2vw;} */
 
 #overlay {
 	z-index: 2;
@@ -45,10 +45,11 @@ img {
 #book{
 	position: absolute;
 	z-index: 3;
-	top: 12vw;
-	left: 14vw;
-	height: 40vw;
-	width: 25vw;
+	/* top: 12vw; */
+	top: 7vw;
+	left: 10vw;
+	height: 35vw;
+	width: 22vw;
 	transform: rotate(-20deg);
 	cursor: pointer;
 	background-color: rgb(197, 50, 141);
@@ -73,13 +74,13 @@ img {
 }
 
 #wanna {
-	left: 42vw;
+	left: 37vw;
 }
 #play {
-	left: 51.2vw;
+	left: 46.2vw;
 }
 #wme {
-	left: 56.5vw;
+	left: 51.5vw;
 }
 
 #book:hover {
@@ -108,5 +109,5 @@ img {
 
 #book:hover ~ #overlay {
 	filter: saturate(0%);
-	transition: 1s ease;
+	transition: 3s ease;
 }
