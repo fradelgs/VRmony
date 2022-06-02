@@ -1,7 +1,5 @@
 html,body {
 	position:fixed;
-	/* font-family: 'Playfair Display SC', serif; */
-	/* font-family: 'Sofia', serif; */
 	top:0;
     bottom:0;
     left:0;
@@ -57,7 +55,11 @@ img {
 	transition: 1s ease;
 }
 
-.text {
+#book_text {
+	
+}
+
+ .text {
 	display: inline-block;
 	position: absolute;
 	z-index: 4;
