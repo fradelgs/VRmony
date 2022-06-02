@@ -18,5 +18,6 @@ function lets_play(){
 function dont_play(){
 	if (audio.paused == false) {
 		audio.pause();
+		audio.currentTime = 0;
 	}
 }

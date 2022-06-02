@@ -1,5 +1,5 @@
 html,body {
-	position: fixed;
+	position:absolute;
 	/* font-family: 'Playfair Display SC', serif; */
 	/* font-family: 'Sofia', serif; */
 	top:0;
@@ -45,10 +45,10 @@ img {
 #book{
 	position: absolute;
 	z-index: 3;
-	top: 15vw;
-	left: 18vw;
-	height: 30vw;
-	width: 20vw;
+	top: 12vw;
+	left: 14vw;
+	height: 40vw;
+	width: 25vw;
 	transform: rotate(-20deg);
 	cursor: pointer;
 	background-color: rgb(197, 50, 141);
@@ -56,19 +56,30 @@ img {
 	transition: 1s ease;
 }
 
-#text {
+.text {
+	display: inline-block;
 	position: absolute;
 	z-index: 4;
-	color: black;
+	color: white;
 	font-family: 'Sofia', serif;
-  	font-size: 2vw;
-  	top: 28vw;
-  	left: 40vw;
+  	font-size: 2.5vw;
+  	/* top: 54vw; */
+	top: 30vw;
 	height: fit-content;
 	width: fit-content;
 	text-align: center;
 	opacity: 0;
 	transition: 1s ease;
+}
+
+#wanna {
+	left: 42vw;
+}
+#play {
+	left: 51.2vw;
+}
+#wme {
+	left: 56.5vw;
 }
 
 #book:hover {
@@ -79,9 +90,20 @@ img {
 	transition: 1s ease;
 }
 
-#book:hover + #text {
+#book:hover ~ #wanna {
 	opacity: 1;
-	transition: 1s ease;
+	transition-delay:2.5s;
+	transition-duration: 1s;
+}
+#book:hover ~ #play {
+	opacity: 1;
+	transition-delay: 3s;
+	transition-duration: 1s;
+}
+#book:hover ~ #wme {
+	opacity: 1;
+	transition-delay: 4s;
+	transition-duration: 3s;
 }
 
 #book:hover ~ #overlay {
