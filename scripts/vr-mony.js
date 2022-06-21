@@ -5,11 +5,10 @@ import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFact
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
 import { GUI } from './libs/three/jsm/dat.gui.module.js';
 
-
-
-let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
+let camera, listener, scene, raycaster, renderer, pointer;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
+let lattice, CLICKED, intersected = [];
 let room;
 
 let color = {
@@ -34,14 +33,14 @@ function initScene(){
     scene.background = new THREE.Color( 0x505050 );
 
     // LISTENER
-    var AudioContext = window.AudioContext || window.webkitAudioContext;
-    var audioCtx = new AudioContext();
+    // var AudioContext = window.AudioContext || window.webkitAudioContext;
+    // var audioCtx = new AudioContext();
     listener = new THREE.AudioListener();
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6, 8 );
-    camera.lookAt( 0, 0, 0 );
+    camera.position.set( 0, 1.6, 4 );
+    // camera.lookAt( 0, 0, 0 );
     camera.add(listener);
 
     // ROOM
@@ -73,8 +72,7 @@ function initScene(){
     pointer= new THREE.Vector2();
 
     document.addEventListener( 'pointerdown', mouseDown, false );
-
-    window.addEventListener('resize', onWindowResize );
+    window.addEventListener('resize', onWindowResize, false );
 }
 
 function initLattice(){
@@ -86,7 +84,6 @@ function initLattice(){
 	var sound = new Array(limitLattice);
 	var oscillator = new Array(limitLattice);
 	var spherePosition = new Array(limitLattice);
-    let lattice;
 
     for (var i = 0; i < limitLattice; i++) {
 		spherePosition[i] = new Array(limitLattice);
@@ -148,38 +145,39 @@ function initLattice(){
     lattice.name = "LATTICE";
     lattice.position.set(-0.5*(limitLattice),0.8,-0.5*(limitLattice + d)); // trovare position in f(limitLattice e distanza d)
 
-    scene.add( lattice );
+    scene.add(lattice);
 
     // GUI
     initGUI(limitLattice, oscillator);
 
 }
 
-function changeState(Object){
-	
-	if (Object.userData[0].MODEL==false) {
-		Object.userData[0].MODEL= true;
-		myRender(Object);	
+function changeState(object){
+	console.log(object);
+	if (object.userData[0].MODEL==false) {
+		object.userData[0].MODEL= true;
+		myRender(object);	
 		
-		db.collection("state").doc("counter").set({
-			id_note: Object.uuid,
-			value: Object.userData[0].MODEL,
-			color: color[Object.userData[0].MODEL]
-		})
+		// db.collection("state").doc("counter").set({
+		// 	id_note: object.uuid,
+		// 	value: object.userData[0].MODEL,
+		// 	color: color[object.userData[0].MODEL]
+		// })
 	}
-	else {Object.userData[0].MODEL= false;
-		myRender(Object);	
-		db.collection("state").doc("counter").set({
-			id_note: Object.uuid,
-			value: Object.userData[0].MODEL,
-			color: color[Object.userData[0].MODEL]
-		})
+	else {object.userData[0].MODEL= false;
+		myRender(object);	
+
+		// db.collection("state").doc("counter").set({
+		// 	id_note: object.uuid,
+		// 	value: object.userData[0].MODEL,
+		// 	color: color[object.userData[0].MODEL]
+		// })
 	}
 }	
 
-function myRender(Object){
-	Object.material.emissive.setHex( color[Object.userData[0].MODEL] );
-	if(Object.children[0]) Object.children[0].gain.gain.setTargetAtTime(Object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
+function myRender(object){
+	object.material.emissive.setHex( color[object.userData[0].MODEL] );
+	if(object.children[0]) object.children[0].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
 }
 
 function mouseDown(event) {
@@ -189,7 +187,6 @@ function mouseDown(event) {
 
 	raycaster.setFromCamera( pointer, camera );
    
-
     var intersectable = scene.getObjectByName("LATTICE", true);
     console.log(intersectable)
 
@@ -237,41 +234,15 @@ function setupVR(){
     const button = new VRButton( renderer );
 
     // CONTROLLERS
-	function onSelectStart() {
-		userData.isSelecting = true;
-	}
-
-	function onSelectEnd() {
-		userData.isSelecting = false;
-	}
-
 	controller1 = renderer.xr.getController( 0 );
+	controller1.name="left";
 	controller1.addEventListener( 'selectstart', onSelectStart );
-	controller1.addEventListener( 'selectend', onSelectEnd );
-
-    controller1.addEventListener( 'connected', function ( event ) {
-    	this.add( buildController( event.data ) );
-	} );
-
-    controller1.addEventListener( 'disconnected', function () {
-		this.remove( this.children[ 0 ] );
-	} );
-
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
+	controller2.name="right";
 	controller2.addEventListener( 'selectstart', onSelectStart );
-	controller2.addEventListener( 'selectend', onSelectEnd );
-
-    controller2.addEventListener( 'connected', function ( event ) {
-		this.add( buildController( event.data ) );
-	} );
-
-    controller2.addEventListener( 'disconnected', function () {
-    	this.remove( this.children[ 0 ] );
-	} );
-
-    scene.add( controller2 );
+	scene.add( controller2 );
 
     const controllerModelFactory = new XRControllerModelFactory();
 
@@ -284,39 +255,115 @@ function setupVR(){
 	controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
 	scene.add( controllerGrip2 );
 
+	// DOLLY
+	var dolly = new THREE.Group();
+    dolly.position.set(0, 0, 6);
+    dolly.name = "dolly";
+    scene.add(dolly);
+    dolly.add(camera);
+    dolly.add(controller1);
+    dolly.add(controller2);
+    dolly.add(controllerGrip1);
+    dolly.add(controllerGrip2);
+
     // RAYCASTER
-    raycaster = new THREE.Raycaster()
-    const workingMatrix = new THREE.Matrix4();
-    const origin = new THREE.Vector3();
+	raycaster = new THREE.Raycaster();
     const controls = new OrbitControls( camera, renderer.domElement );
 	controls.update();
 
-}
+	var geometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, -1)
+    ]);
 
-function buildController( data ){
-    let geometry, material;
+    var line = new THREE.Line(geometry);
+    line.name = "line";
+    // line.scale.z = 50;   //MODIFIED FOR LARGER SCENE
 
-    switch ( data.targetRayMode ) {
-
-        case 'tracked-pointer':
-
-            geometry = new THREE.BufferGeometry();
-            geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
-            geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
-
-            material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
-
-            return new THREE.Line( geometry, material );
-
-        case 'gaze':
-
-            geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
-            material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
-            return new THREE.Mesh( geometry, material );
-
-    }
+    controller1.add(line.clone());
+    controller2.add(line.clone());
 
 }
+
+function onSelectStart(event) {
+	var controller = event.target;
+	var intersections = getIntersections(controller);	// get intersected objects
+
+	if (intersections.length > 0){
+		var intersection = intersections[ 0 ]; // get the first intersected object
+		var object = intersection.object;
+		changeState(object);
+
+		// controller.attach(object);
+		// controller.userData.selected = object;
+		// const id = object.uuid; //getID of clicked object
+		// console.log("id " + id);
+	}
+}
+
+
+function getIntersections(controller) {
+	var tempMatrix = new THREE.Matrix4();
+	tempMatrix.identity().extractRotation(controller.matrixWorld);
+	raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+	raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+	return raycaster.intersectObjects(lattice.children);
+}
+
+// HOVER
+function intersectObjects(controller) {
+	// Do not highlight when already selected
+
+	if (controller.userData.selected !== undefined) return;
+
+	var line = controller.getObjectByName("line");
+	var intersections = getIntersections(controller);
+
+	if (intersections.length > 0) {
+		var intersection = intersections[0];
+
+		////////////////////////////////////////
+		//// MODIFICATIONS FROM THREEJS EXAMPLE
+		//// check if in webXR session
+		//// if so, provide haptic feedback to the controller that raycasted onto object
+		//// (only if haptic actuator is available)
+		// const session = renderer.xr.getSession();
+		// if (session) {  //only if we are in a webXR session
+		// 	for (const sourceXR of session.inputSources) {
+
+		// 		if (!sourceXR.gamepad) continue;
+		// 		if (
+		// 			sourceXR &&
+		// 			sourceXR.gamepad &&
+		// 			sourceXR.gamepad.hapticActuators &&
+		// 			sourceXR.gamepad.hapticActuators[0] &&
+		// 			sourceXR.handedness == controller.name              
+		// 		) {
+		// 			var didPulse = sourceXR.gamepad.hapticActuators[0].pulse(0.8, 100);
+		// 		}
+		// 	}
+		// }
+		////
+		////////////////////////////////
+
+		var object = intersection.object;
+		object.material.emissive.r = 1;
+		intersected.push(object);
+
+		line.scale.z = intersection.distance;
+	} else {
+		line.scale.z = 50;   //MODIFIED AS OUR SCENE IS LARGER
+	}
+}
+
+// NOT HOVER
+function cleanIntersected() {
+	while (intersected.length) {
+		var object = intersected.pop();
+		object.material.emissive.setHex( color[object.userData[0].MODEL] );
+	}
+}
+
 
 function onWindowResize(){
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -324,32 +371,18 @@ function onWindowResize(){
     renderer.setSize( window.innerWidth, window.innerHeight );  
 }
 
+
 function animate() {
     renderer.setAnimationLoop( render );
 }
 
-function handleController( controller ){
-    if ( controller.userData.isSelecting ) {
 
-        // const object = room.children[ count ++ ];
-
-        // object.position.copy( controller.position );
-        // object.userData.velocity.x = ( Math.random() - 0.5 ) * 3;
-        // object.userData.velocity.y = ( Math.random() - 0.5 ) * 3;
-        // object.userData.velocity.z = ( Math.random() - 9 );
-        // object.userData.velocity.applyQuaternion( controller.quaternion );
-
-        // if ( count === room.children.length ) count = 0;
-    }
-}
-    
 function render() {
-    if (renderer.xr.isPresenting) {
-        handleController( controller1 );
-	    handleController( controller2 );
-    }
-    
-    // world.step(dt);
-    // helper.update( );
-    renderer.render(scene, camera );
+	cleanIntersected();
+
+	intersectObjects(controller1);
+    intersectObjects(controller2);
+	renderer.render(scene, camera );    
 }
+
+
