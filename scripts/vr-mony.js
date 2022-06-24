@@ -224,8 +224,8 @@ function initGUI(limitLattice, oscillator){
 	} );
 
     generatorFolder.open();
-
 }
+
 
 function setupVR(){
     renderer.xr.enabled = true;
@@ -278,7 +278,7 @@ function setupVR(){
 
     var line = new THREE.Line(geometry);
     line.name = "line";
-    // line.scale.z = 50;   //MODIFIED FOR LARGER SCENE
+    line.scale.z = 50;   //MODIFIED FOR LARGER SCENE
 
     controller1.add(line.clone());
     controller2.add(line.clone());
@@ -321,32 +321,8 @@ function intersectObjects(controller) {
 
 	if (intersections.length > 0) {
 		var intersection = intersections[0];
-
-		////////////////////////////////////////
-		//// MODIFICATIONS FROM THREEJS EXAMPLE
-		//// check if in webXR session
-		//// if so, provide haptic feedback to the controller that raycasted onto object
-		//// (only if haptic actuator is available)
-		// const session = renderer.xr.getSession();
-		// if (session) {  //only if we are in a webXR session
-		// 	for (const sourceXR of session.inputSources) {
-
-		// 		if (!sourceXR.gamepad) continue;
-		// 		if (
-		// 			sourceXR &&
-		// 			sourceXR.gamepad &&
-		// 			sourceXR.gamepad.hapticActuators &&
-		// 			sourceXR.gamepad.hapticActuators[0] &&
-		// 			sourceXR.handedness == controller.name              
-		// 		) {
-		// 			var didPulse = sourceXR.gamepad.hapticActuators[0].pulse(0.8, 100);
-		// 		}
-		// 	}
-		// }
-		////
-		////////////////////////////////
-
 		var object = intersection.object;
+		
 		object.material.emissive.r = 1;
 		intersected.push(object);
 
