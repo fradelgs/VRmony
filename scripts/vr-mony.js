@@ -5,11 +5,27 @@ import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFact
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
 import { GUI } from './libs/three/jsm/dat.gui.module.js';
 
-let camera, listener, scene, raycaster, renderer, pointer;
+let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-let lattice, CLICKED, intersected = [];
 let room;
+let settings;
+let spherePosition;
+let BallDistance = 2; // Distance between two balls
+let SpheresPerEdge = 2; // per Edge
+let Lattice = new THREE.Group();
+let oscillator = [];
+let gainNode = [];
+let intonation = [];
+let mixer;
+let light1;
+let ball;
+let audioCtx;
+let f0 = 261.6; //Lattice Fundamental Frequency
+
+let intersected = [];
+
+let sound = [];
 
 let color = {
 	false: 'white', 
@@ -19,7 +35,7 @@ let color = {
 const container = document.createElement( 'div' );
 document.body.appendChild( container );
         
-const clock = new THREE.Clock();
+let clock;
 
 initScene();
 animate();
@@ -36,6 +52,7 @@ function initScene(){
     // var AudioContext = window.AudioContext || window.webkitAudioContext;
     // var audioCtx = new AudioContext();
     listener = new THREE.AudioListener();
+	audioCtx = listener.context;
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
@@ -52,13 +69,43 @@ function initScene(){
     scene.add(room);
 
     // LIGHT
-    scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+	const ambienceLight = new THREE.HemisphereLight( 0x606060, 0x404040 );
 	const light = new THREE.DirectionalLight( 0xffffff );
 	light.position.set( 1, 1, 1 ).normalize();
+	light.intensity = 0.4;
+	ambienceLight.intensity = 0.5;
+	scene.add( ambienceLight);
 	scene.add( light ); 
 
     // LATTICE
-    initLattice();
+    initLatticeNEW();
+
+	initSoundLattice();
+
+	Lattice.position.set(-0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
+	// Creation of Lattice "Metadata"
+	Lattice.name = "Reticolo"; 
+	Lattice.children[0].material.transparent = 'true';
+	//Lattice.children[0].material.emissive.setHex = '0xff0040';
+	Lattice.children[0].material.emissiveIntensity = 1;
+	light1 = new THREE.PointLight( 0xff0040, 100, 50 );
+	Lattice.children[0].add(light1);
+	Lattice.children[0].material.emissive = {r:1,g:0,b:0.25};
+	console.log(Lattice);
+	Lattice.name= "LATTICE";
+
+	SoundVisualPatching();
+
+	// create some keyframe tracks
+	const lightIntensityKF = new THREE.NumberKeyframeTrack( '.children[0].intensity', [ 0, 1, 2], [ 0, 1, 0] );
+	const colorKF = new THREE.ColorKeyframeTrack( '.material.emissiveIntensity', [ 0, 1, 2 ], [ 0, 1, 0]);
+	const clip = new THREE.AnimationClip( 'default', 2, [lightIntensityKF, colorKF]);
+	mixer = new THREE.AnimationMixer( Lattice.children[0] );
+	const clipAction = mixer.clipAction( clip );
+	clipAction.play();
+
+	// GUI
+	//initGUI();
 
     // RENDERER
     renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -70,6 +117,8 @@ function initScene(){
     //POINTER MOUSE
     CLICKED = null;
     pointer= new THREE.Vector2();
+
+	clock = new THREE.Clock();
 
     document.addEventListener( 'pointerdown', mouseDown, false );
     window.addEventListener('resize', onWindowResize, false );
@@ -150,6 +199,67 @@ function initLattice(){
     // GUI
     initGUI(limitLattice, oscillator);
 
+}
+
+function initLatticeNEW(){
+	for(var i = 0; i<SpheresPerEdge; i++){
+		for(var j = 0; j<SpheresPerEdge; j++){
+			for(var k = 0; k<SpheresPerEdge; k++){
+				spherePosition = [i*BallDistance, j*BallDistance, k*BallDistance];
+				ball = Ball();
+				ball.userData[0] = {MODEL: false, PREVIOUS: false};
+				Lattice.add(ball);
+			}
+		}
+	}
+	scene.add(Lattice);
+}
+
+function initSoundLattice(){
+	for(var i = 0; i<SpheresPerEdge; i++){
+		for(var j = 0; j<SpheresPerEdge; j++){
+			for(var k = 0; k<SpheresPerEdge; k++){
+				intonation[i+j+k] = ((f0 * Math.pow(2, (i*7)/12)) * Math.pow(2, (j*4)/12))*Math.pow(2, (k*10)/12);
+				gainNode[i+j+k] = audioCtx.createGain();
+				oscillator[i+j+k]= audioCtx.createOscillator()
+				oscillator[i+j+k].type = 'sine';
+				oscillator[i+j+k].frequency.setValueAtTime(intonation[i+j+k], audioCtx.currentTime);
+				oscillator[i+j+k].start(0);
+				sound.push( new THREE.PositionalAudio( listener ));
+				sound[i+j+k].setNodeSource(oscillator[i+j+k]);
+				sound[i+j+k].setVolume(0.0);
+				// connect oscillator to gain node to speakers
+  				//oscillator[i+j+k].connect(gainNode[i+j+k]);
+  				//gainNode[i+j+k].connect(audioCtx.destination);
+				//gainNode[i+j+k].gain.value = 0.1;
+			}
+		}
+	}	
+}
+
+function SoundVisualPatching(){
+	for(var i = 0; i<SpheresPerEdge; i++){
+		for(var j = 0; j<SpheresPerEdge; j++){
+			for(var k = 0; k<SpheresPerEdge; k++){
+				Lattice.children[i+j+k].add(sound[i+j+k]);
+			}
+		}
+	}
+}
+
+
+function Ball(){
+	const BallGeometry = new THREE.SphereGeometry(0.5, 30, 30);
+	const material1 = new THREE.MeshStandardMaterial( { color: 'white', roughness: 0, metalness: 0, transparent: true } ) ;
+	const material2 = new THREE.MeshPhongMaterial( {
+		color: 'white',
+		opacity: 1,
+
+	} );
+
+	var ball = new THREE.Mesh( BallGeometry, material2);
+	ball.position.set(spherePosition[0],spherePosition[1],spherePosition[2]);
+	return ball;
 }
 
 function changeState(object){
@@ -307,7 +417,7 @@ function getIntersections(controller) {
 	tempMatrix.identity().extractRotation(controller.matrixWorld);
 	raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
 	raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-	return raycaster.intersectObjects(lattice.children);
+	return raycaster.intersectObjects(Lattice.children);
 }
 
 // HOVER
@@ -354,6 +464,12 @@ function animate() {
 
 
 function render() {
+	const delta = clock.getDelta();
+
+	if ( mixer ) {
+	mixer.update( delta );
+	}
+
 	cleanIntersected();
 
 	intersectObjects(controller1);
