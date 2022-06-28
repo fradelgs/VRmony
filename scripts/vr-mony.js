@@ -104,20 +104,7 @@ function initScene(){
 	clipAction.play();
 
 
-	SoundVisualPatching()
-
-
-	console.log("here")
-	console.log(sound[0].source.frequency)
-	console.log(sound[1].source.frequency)
-	console.log(sound[2].source.frequency)
-	console.log(sound[3].source.frequency)
-	console.log(sound[4].source.frequency)
-	console.log(sound[5].source.frequency)
-	console.log(sound[6].source.frequency)
-	console.log(sound[7].source.frequency)
-
-
+	SoundVisualPatching();
 	
 	// GUI
 	//initGUI();
@@ -135,7 +122,7 @@ function initScene(){
 
 	clock = new THREE.Clock();
 
-    document.addEventListener( 'pointerdown', mouseDown, false );
+    //document.addEventListener( 'pointerdown', mouseDown, false );
     window.addEventListener('resize', onWindowResize, false );
 }
 
@@ -223,13 +210,13 @@ function changeState(object){
 
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
-	if(object.children[0]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
+	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
 }
 
 function myRender(object){
-	console.log(object);
+	var lastIndex = object.children.length - 1;
 	object.material.color.setHex( color[object.userData[0].MODEL] );
-	if(object.children[0]) object.children[0].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
+	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
 }
 
 function mouseDown(event) {
@@ -376,6 +363,7 @@ function intersectObjects(controller) {
 		var object = intersection.object;
 		
 		object.material.emissive.r = 1;
+		object.material.emissiveIntensity = 1;
 		intersected.push(object);
 
 		line.scale.z = intersection.distance;
@@ -388,10 +376,9 @@ function intersectObjects(controller) {
 function cleanIntersected() {
 	while (intersected.length) {
 		var object = intersected.pop();
-		object.material.emissive.setHex( color[object.userData[0].MODEL] );
+		object.material.emissiveIntensity = 0;
 	}
 }
-
 
 function onWindowResize(){
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -416,5 +403,6 @@ function render() {
 
 	intersectObjects(controller1);
     intersectObjects(controller2);
+	
 	renderer.render(scene, camera );    
 }
