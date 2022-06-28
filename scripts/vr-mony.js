@@ -28,7 +28,7 @@ let intersected = [];
 let sound = [];
 
 let color = {
-	false: 'white', 
+	false: '0xffffff', 
 	true: '0xff00ff'
 };
 
@@ -82,6 +82,7 @@ function initScene(){
 
 	initSoundLattice();
 
+
 	Lattice.position.set(-0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
 	// Creation of Lattice "Metadata"
 	Lattice.name = "Reticolo"; 
@@ -94,8 +95,6 @@ function initScene(){
 	console.log(Lattice);
 	Lattice.name= "LATTICE";
 
-	SoundVisualPatching();
-
 	// create some keyframe tracks
 	const lightIntensityKF = new THREE.NumberKeyframeTrack( '.children[0].intensity', [ 0, 1, 2], [ 0, 1, 0] );
 	const colorKF = new THREE.ColorKeyframeTrack( '.material.emissiveIntensity', [ 0, 1, 2 ], [ 0, 1, 0]);
@@ -104,6 +103,22 @@ function initScene(){
 	const clipAction = mixer.clipAction( clip );
 	clipAction.play();
 
+
+	SoundVisualPatching()
+
+
+	console.log("here")
+	console.log(sound[0].source.frequency)
+	console.log(sound[1].source.frequency)
+	console.log(sound[2].source.frequency)
+	console.log(sound[3].source.frequency)
+	console.log(sound[4].source.frequency)
+	console.log(sound[5].source.frequency)
+	console.log(sound[6].source.frequency)
+	console.log(sound[7].source.frequency)
+
+
+	
 	// GUI
 	//initGUI();
 
@@ -124,83 +139,6 @@ function initScene(){
     window.addEventListener('resize', onWindowResize, false );
 }
 
-function initLattice(){
-    var limitLattice = 3;
-	const intonation = [];
-	let fund = 261.6;
-	const d = 2;
-	var note = new Array(limitLattice);
-	var sound = new Array(limitLattice);
-	var oscillator = new Array(limitLattice);
-	var spherePosition = new Array(limitLattice);
-
-    for (var i = 0; i < limitLattice; i++) {
-		spherePosition[i] = new Array(limitLattice);
-		intonation[i] = new Array(limitLattice);
-		note[i] = new Array(limitLattice);
-		sound[i] = new Array(limitLattice);
-		oscillator[i] = new Array(limitLattice);
-	}
-
-	for(var i = 0; i<limitLattice; i++){
-		for(var j = 0; j<limitLattice; j++){
-			spherePosition[i][j] = new Array(limitLattice);
-			intonation[i][j] = new Array(limitLattice);
-			note[i][j] = new Array(limitLattice);
-			sound[i][j] = new Array(limitLattice);
-			oscillator[i][j] = new Array(limitLattice);
-		}
-	}
-
-	for(var i = 0; i<limitLattice; i++){
-		for(var j = 0; j<limitLattice; j++){
-			for(var k = 0; k<limitLattice; k++){
-				spherePosition[i][j][k] = [ i*d, j*d, k*d];
-				intonation[i][j][k] = ((fund * Math.pow(2, (i*7)/12)) * Math.pow(2, (j*4)/12))*Math.pow(2, (k*10)/12);
-			}
-		}
-	}
-
-    const vertex = new THREE.SphereGeometry(0.5, 30, 30);
-	
-	lattice = new THREE.Group();
-
-	const geometry = [];
-	const material = [];
-
-    for(var i = 0; i<limitLattice; i++){
-		for(var j = 0; j<limitLattice; j++){
-			for(var k = 0; k<limitLattice; k++){
-				note[i][j][k] = new THREE.Mesh( vertex, new THREE.MeshStandardMaterial( { color: 'white', roughness: 1, metalness: 0.5 } ) );
-				note[i][j][k].position.set(spherePosition[i][j][k][0],spherePosition[i][j][k][1],spherePosition[i][j][k][2]);
-				note[i][j][k].userData[0] = {MODEL: false, PREVIOUS: false};
-				note[i][j][k].name = "vertex";
-				note[i][j][k].uuid = [i, j, k];
-				sound[i][j][k] = new THREE.PositionalAudio( listener );
-				oscillator[i][j][k] = listener.context.createOscillator();
-				oscillator[i][j][k].type = 'sawtooth';
-				oscillator[i][j][k].frequency.setValueAtTime(intonation[i][j][k], listener.context.currentTime);
-				oscillator[i][j][k].start(0);
-				sound[i][j][k].setNodeSource(oscillator[i][j][k]);
-				sound[i][j][k].setRefDistance(20);  
-				sound[i][j][k].setVolume(0.0);
-				//sound[i][j][k].connect(filter);
-				note[i][j][k].add(sound[i][j][k]);
-				lattice.add(note[i][j][k]);
-			}
-		}
-	}
-
-    lattice.name = "LATTICE";
-    lattice.position.set(-0.5*(limitLattice),0.8,-0.5*(limitLattice + d)); // trovare position in f(limitLattice e distanza d)
-
-    scene.add(lattice);
-
-    // GUI
-    initGUI(limitLattice, oscillator);
-
-}
-
 function initLatticeNEW(){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
@@ -216,34 +154,28 @@ function initLatticeNEW(){
 }
 
 function initSoundLattice(){
-	for(var i = 0; i<SpheresPerEdge; i++){
-		for(var j = 0; j<SpheresPerEdge; j++){
-			for(var k = 0; k<SpheresPerEdge; k++){
-				intonation[i+j+k] = ((f0 * Math.pow(2, (i*7)/12)) * Math.pow(2, (j*4)/12))*Math.pow(2, (k*10)/12);
-				gainNode[i+j+k] = audioCtx.createGain();
-				oscillator[i+j+k]= audioCtx.createOscillator()
-				oscillator[i+j+k].type = 'sine';
-				oscillator[i+j+k].frequency.setValueAtTime(intonation[i+j+k], audioCtx.currentTime);
-				oscillator[i+j+k].start(0);
-				sound.push( new THREE.PositionalAudio( listener ));
-				sound[i+j+k].setNodeSource(oscillator[i+j+k]);
-				sound[i+j+k].setVolume(0.0);
-				// connect oscillator to gain node to speakers
-  				//oscillator[i+j+k].connect(gainNode[i+j+k]);
-  				//gainNode[i+j+k].connect(audioCtx.destination);
-				//gainNode[i+j+k].gain.value = 0.1;
+	for(var i = 0; i< Math.pow(SpheresPerEdge, 3) ; i++){
+		//intonation[i] = ((f0 * Math.pow(2, (i*7)/12)) * Math.pow(2, (i*4)/12))*Math.pow(2, (i*10)/12);
+		intonation[i] = 100;
+		gainNode[i] = audioCtx.createGain();
+		oscillator[i]= audioCtx.createOscillator()
+		oscillator[i].type = 'sine';
+		oscillator[i].frequency.setValueAtTime(intonation[i], audioCtx.currentTime);
+		oscillator[i].start(0);
+		sound[i] = new THREE.PositionalAudio( listener );
+		sound[i].setNodeSource(oscillator[i]);
+		sound[i].setVolume(0.0);
+		// connect oscillator to gain node to speakers
+  		//oscillator[i+j+k].connect(gainNode[i+j+k]);
+  		//gainNode[i+j+k].connect(audioCtx.destination);
+		//gainNode[i+j+k].gain.value = 0.1;
+		console.log(i)
 			}
 		}
-	}	
-}
 
 function SoundVisualPatching(){
-	for(var i = 0; i<SpheresPerEdge; i++){
-		for(var j = 0; j<SpheresPerEdge; j++){
-			for(var k = 0; k<SpheresPerEdge; k++){
-				Lattice.children[i+j+k].add(sound[i+j+k]);
-			}
-		}
+	for(var i = 0; i<Math.pow(SpheresPerEdge,3); i++){
+		Lattice.children[i].add(sound[i]);
 	}
 }
 
@@ -266,7 +198,9 @@ function changeState(object){
 	console.log(object);
 	if (object.userData[0].MODEL==false) {
 		object.userData[0].MODEL= true;
-		myRender(object);	
+		audioRender(object);
+		myRender(object);
+
 		
 		// db.collection("state").doc("counter").set({
 		// 	id_note: object.uuid,
@@ -275,7 +209,9 @@ function changeState(object){
 		// })
 	}
 	else {object.userData[0].MODEL= false;
-		myRender(object);	
+		audioRender(object);
+		myRender(object);
+	
 
 		// db.collection("state").doc("counter").set({
 		// 	id_note: object.uuid,
@@ -285,8 +221,14 @@ function changeState(object){
 	}
 }	
 
+function audioRender(object){
+	var lastIndex = object.children.length - 1;
+	if(object.children[0]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
+}
+
 function myRender(object){
-	object.material.emissive.setHex( color[object.userData[0].MODEL] );
+	console.log(object);
+	object.material.color.setHex( color[object.userData[0].MODEL] );
 	if(object.children[0]) object.children[0].gain.gain.setTargetAtTime(object.userData[0].MODEL*0.125, listener.context.currentTime + 0, 0.5);
 }
 
@@ -476,5 +418,3 @@ function render() {
     intersectObjects(controller2);
 	renderer.render(scene, camera );    
 }
-
-
