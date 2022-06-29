@@ -585,15 +585,15 @@ function setupVR(){
 	scene.add( controllerGrip2 );
 
 	// DOLLY
-	var dolly = new THREE.Group();
-    dolly.position.set(0, 0, 6);
-    dolly.name = "dolly";
-    scene.add(dolly);
-    dolly.add(camera);
-    dolly.add(controller1);
-    dolly.add(controller2);
-    dolly.add(controllerGrip1);
-    dolly.add(controllerGrip2);
+	// var dolly = new THREE.Group();
+    // dolly.position.set(0, 0, 6);
+    // dolly.name = "dolly";
+    // scene.add(dolly);
+    // dolly.add(camera);
+    // dolly.add(controller1);
+    // dolly.add(controller2);
+    // dolly.add(controllerGrip1);
+    // dolly.add(controllerGrip2);
 
     // RAYCASTER
 	raycaster = new THREE.Raycaster();
