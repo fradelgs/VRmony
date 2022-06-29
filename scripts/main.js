@@ -6,11 +6,10 @@ var book = document.getElementById('book');
 book.onmouseover = function() {lets_play()};
 book.onmouseleave = function() {dont_play()};
 book.setAttribute('onclick', 'location.href = "vrmony.html"');
-// book.setAttribute('onclick', 'location.href = "vr-mony-session.html"');
-// book.onclick = function() {enterapp()};
 
 function lets_play(){
 	if (audio.paused == true) {
+		audio.currentTime = 1.5;
 		audio.play();
 	}
 }
@@ -18,6 +17,6 @@ function lets_play(){
 function dont_play(){
 	if (audio.paused == false) {
 		audio.pause();
-		audio.currentTime = 0;
+		audio.currentTime = 1.5;
 	}
 }

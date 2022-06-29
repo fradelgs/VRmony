@@ -564,12 +564,12 @@ function setupVR(){
 
     // CONTROLLERS
 	controller1 = renderer.xr.getController( 0 );
-	controller1.name="left";
+	controller1.name ="left";
 	controller1.addEventListener( 'selectstart', onSelectStart );
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
-	controller2.name="right";
+	controller2.name ="right";
 	controller2.addEventListener( 'selectstart', onSelectStart );
 	scene.add( controller2 );
 
