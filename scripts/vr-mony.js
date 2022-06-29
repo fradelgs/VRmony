@@ -19,13 +19,16 @@ let gainNode = [];
 let intonation = new Array(SpheresPerEdge);
 let mixer;
 let light1;
-let ball;
+let ball = new Array(SpheresPerEdge);;
 let audioCtx;
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 1;
 let k = 100;
 let t = k * (1/f0);
 let normAmp = 1/Math.pow(SpheresPerEdge, 3); //normalizzazione del volume
+let xAxisInterval = 7; //Fifths default
+let yAxisInterval = 4; //Maj.Thirds default
+let zAxisInterval = 10; // min. Seventh default
 
 let intersected = [];
 
@@ -45,7 +48,7 @@ initScene();
 animate();
 setupVR();
 
-console.log(controller1);
+//console.log(controller1);
 
 function initScene(){
     // SCENE
@@ -83,6 +86,10 @@ function initScene(){
 
     // LATTICE
     initLatticeNEW();
+	console.log(ball)
+
+	//destroyLattice();
+	console.log(ball)
 
 	initSoundLattice();
 
@@ -90,10 +97,10 @@ function initScene(){
 	// Creation of Lattice "Metadata"
 	Lattice.name = "Lattice"; // per intersect nel raycaster!
 	
-	Lattice.children[0].material.emissiveIntensity = 1;
+	ball[1][1][1].material.emissiveIntensity = 1;
 	light1 = new THREE.PointLight( 0xff0040, 100, 50 );
-	Lattice.children[0].add(light1);
-	Lattice.children[0].material.emissive = {r:1,g:0,b:0.25};
+	ball[1][1][1].add(light1);
+	ball[1][1][1].material.emissive = {r:1,g:0,b:0.25};
 
 	fundGlow();
 
@@ -125,19 +132,40 @@ function fundGlow(){
 	const lightIntensityKF = new THREE.NumberKeyframeTrack( '.children[0].intensity', [ 0, t, 2*t], [ 0, 1, 0] );
 	const colorKF = new THREE.ColorKeyframeTrack( '.material.emissiveIntensity', [ 0, 1*t, 2*t ], [ 0, 1, 0]);
 	const clip = new THREE.AnimationClip( 'default', 2*t, [lightIntensityKF, colorKF]);
-	mixer = new THREE.AnimationMixer( Lattice.children[0] );
+	mixer = new THREE.AnimationMixer( ball[1][1][1] );
 	const clipAction = mixer.clipAction( clip );
 	clipAction.play();
 }
 
-function initLatticeNEW(){
+function defBallMatrix(){
+
+	for (var i = 0; i < SpheresPerEdge; i++) {
+		ball[i] = new Array(SpheresPerEdge);
+	}
+	
+	for (var i = 0; i < SpheresPerEdge; i++) {
+		for (var j = 0; j < SpheresPerEdge; j++) {
+			ball[i][j] = new Array(SpheresPerEdge);
+		}
+	}
+
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
 				spherePosition = [i*BallDistance, j*BallDistance, k*BallDistance];
-				ball = Ball();
-				ball.userData[0] = {MODEL: false, PREVIOUS: false};
-				Lattice.add(ball);
+				ball[i][j][k] = Ball();
+				ball[i][j][k].userData[0] = {MODEL: false, PREVIOUS: false};
+			}
+		}
+	}
+}
+
+function initLatticeNEW(){
+	defBallMatrix();
+	for(var i = 0; i<SpheresPerEdge; i++){
+		for(var j = 0; j<SpheresPerEdge; j++){
+			for(var k = 0; k<SpheresPerEdge; k++){
+				Lattice.add(ball[i][j][k]);
 			}
 		}
 	}
@@ -145,11 +173,14 @@ function initLatticeNEW(){
 }
 
 function destroyLattice(){
-	for(let i = 0; i < SpheresPerEdge*SpheresPerEdge*SpheresPerEdge; i++){
-		Lattice.remove(Lattice.children[i])
+	for(var i = 0; i<SpheresPerEdge; i++){
+		for(var j = 0; j<SpheresPerEdge; j++){
+			for(var k = 0; k<SpheresPerEdge; k++){
+				ball.pop();
+			}
+		}
 	}
 }
-
 
 function defSoundMatrices(){
 	for (var i = 0; i < SpheresPerEdge; i++) {
@@ -174,7 +205,7 @@ function initIntonation(){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
-				intonation[i][j][k]=((Oct * f0 * Math.pow(2, (i*7)/12)) * Math.pow(2, (j*4)/12))*Math.pow(2, (k*10)/12);
+				intonation[i][j][k]=((Math.pow(2, Oct) * f0 * Math.pow(2, ((i-1)*xAxisInterval)/12)) * Math.pow(2, ((j-1)*yAxisInterval)/12))* Math.pow(2, ((k-1)*zAxisInterval)/12);
 			}
 		}
 	}
@@ -210,7 +241,6 @@ function initSoundLattice(){
 				sound[i][j][k] = new THREE.PositionalAudio( listener );
 				sound[i][j][k].setNodeSource(oscillator[i][j][k]);
 				sound[i][j][k].setVolume(0.0);
-				console.log(sound)
 				// connect oscillator to gain node to speakers
   				oscillator[i][j][k].connect(gainNode[i][j][k]);
   				gainNode[i][j][k].connect(audioCtx.destination);
@@ -281,7 +311,7 @@ function changeState(object){
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
 	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp, listener.context.currentTime + 0, 0.5);
-	console.log(object.children[lastIndex])
+	//console.log(object.children[lastIndex])
 }
 
 function myRender(object){
@@ -318,6 +348,9 @@ function initGUI(){
 	settings = {
 		'Wave Form': 'sine',
 		'Fundamental Frequency': 'C',
+		'x-axis Interval': 'V',
+		'y-axis Interval': 'M III',
+		'z-axis Interval': 'm VII',
 		'Octave': 1,
 		'SpheresPerEdge': 1,
 		'Intonation System': 'equal',
@@ -328,7 +361,10 @@ function initGUI(){
 
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder1.add( settings, 'Octave', 0, 8, 1 ).onChange(setOctave);
+	folder1.add( settings, 'x-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
+	folder1.add( settings, 'y-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
+	folder1.add( settings, 'z-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
+	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
 	//folder1.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
 	folder1.add( settings, 'Intonation System', 'equal').onChange(intonationSystem);
 
@@ -342,11 +378,117 @@ function initGUI(){
 }*/
 
 function setOctave(octave){
-	Oct = Math.pow(2, octave);
+	Oct = octave;
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
 }
+
+function setXaxis(interval){
+	switch (interval) {
+		case 'm II': xAxisInterval = 1;
+			break;
+		case 'M II': xAxisInterval = 2;
+			break;
+		case 'm III': xAxisInterval = 3;
+			break;
+		case 'M III':  xAxisInterval = 4;
+			break;
+		case 'IV': xAxisInterval = 5;
+			break;
+		case 'm V': xAxisInterval = 6;
+			break;
+		case 'V': xAxisInterval = 7;
+			break;
+		case 'm VI':  xAxisInterval = 8;
+			break;	
+		case 'M VI': xAxisInterval = 9;
+			break;
+		case 'm VII': xAxisInterval = 10;
+			break;	
+		case 'M VII':  xAxisInterval = 11;
+			break;
+		case 'VIII':  xAxisInterval = 12;
+			break;
+		default: xAxisInterval = 4;
+			break;
+	}
+
+	initIntonation();
+	initOscFreqs();
+	fundGlow();
+}
+
+function setYaxis(interval){
+	switch (interval) {
+		case 'm II': yAxisInterval = 1;
+			break;
+		case 'M II': yAxisInterval = 2;
+			break;
+		case 'm III': yAxisInterval = 3;
+			break;
+		case 'M III':  yAxisInterval = 4;
+			break;
+		case 'IV': yAxisInterval = 5;
+			break;
+		case 'm V': yAxisInterval = 6;
+			break;
+		case 'V': yAxisInterval = 7;
+			break;
+		case 'm VI':  yAxisInterval = 8;
+			break;	
+		case 'M VI': yAxisInterval = 9;
+			break;
+		case 'm VII': yAxisInterval = 10;
+			break;	
+		case 'M VII':  yAxisInterval = 11;
+			break;
+		case 'VIII':  yAxisInterval = 12;
+			break;
+		default: yAxisInterval = 4;
+			break;
+	}
+
+	initIntonation();
+	initOscFreqs();
+	fundGlow();
+}
+
+function setZaxis(interval){
+	switch (interval) {
+		case 'm II': zAxisInterval = 1;
+			break;
+		case 'M II': zAxisInterval = 2;
+			break;
+		case 'm III': zAxisInterval = 3;
+			break;
+		case 'M III':  zAxisInterval = 4;
+			break;
+		case 'IV': zAxisInterval = 5;
+			break;
+		case 'm V': zAxisInterval = 6;
+			break;
+		case 'V': zAxisInterval = 7;
+			break;
+		case 'm VI':  zAxisInterval = 8;
+			break;	
+		case 'M VI': zAxisInterval = 9;
+			break;
+		case 'm VII': zAxisInterval = 10;
+			break;	
+		case 'M VII':  zAxisInterval = 11;
+			break;
+		case 'VIII':  zAxisInterval = 12;
+			break;
+		default: zAxisInterval = 4;
+			break;
+	}
+
+	initIntonation();
+	initOscFreqs();
+	fundGlow();
+}
+
 function setWave(a){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
