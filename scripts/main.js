@@ -20,7 +20,7 @@ book.setAttribute('onclick', 'location.href = "vrmony.html"');
 
 function lets_play(){
 	if (audio.paused == true) {
-		audio.currentTime = 1.5;
+		audio.currentTime = 1.55;
 		audio.play();
 	}
 }
