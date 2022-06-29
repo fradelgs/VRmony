@@ -10,7 +10,7 @@ import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
-let room;
+let room, marker, floor, baseReferenceSpace;
 let settings;
 let spherePosition;
 let BallDistance = 2; // Distance between two balls
@@ -33,6 +33,8 @@ let yAxisInterval = 4; //Maj.Thirds default
 let zAxisInterval = 10; // min. Seventh default
 
 let intersected = [];
+let floor_intersection;
+const floor_tempMatrix = new THREE.Matrix4();
 
 let sound = [];
 
@@ -52,7 +54,6 @@ initScene();
 animate();
 setupVR();
 
-//console.log(controller1);
 
 function initScene(){
     // SCENE
@@ -67,17 +68,31 @@ function initScene(){
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6, 4 );
+    camera.position.set( 0, 1.6, 10);
     // camera.lookAt( 0, 0, 0 );
     camera.add(listener);
 
     // ROOM
     room = new THREE.LineSegments(
-        new BoxLineGeometry( 20, 10, 20, 10, 10, 10 ),
+        new BoxLineGeometry( 20, 10, 20, 10, 10, 10 ).translate( 0, 5, 0 ),
         new THREE.LineBasicMaterial( { color: 0x808080 } )
     );
-    room.geometry.translate( 0, 5, 0 );
+    
     scene.add(room);
+
+	// MARKER
+	marker = new THREE.Mesh(
+		new THREE.CircleGeometry( 0.25, 32 ).rotateX( - Math.PI / 2 ),
+		new THREE.MeshBasicMaterial( { color: 0x8b0000 } )
+	);
+	scene.add( marker );
+	
+	// FLOOR
+	floor = new THREE.Mesh(
+		new THREE.PlaneGeometry( 20, 20, 10, 10 ).rotateX( - Math.PI / 2 ),
+		new THREE.MeshBasicMaterial( { color: 'grey', transparent: true, opacity: 0.25 } )
+	);
+	scene.add( floor );
 
     // LIGHT
 	const ambienceLight = new THREE.HemisphereLight( 0x606060, 0x404040 );
@@ -88,6 +103,9 @@ function initScene(){
 	scene.add( ambienceLight);
 	scene.add( light ); 
 
+	// RAYCASTER
+	raycaster = new THREE.Raycaster();
+	
     // LATTICE
     initLatticeNEW();
 	console.log(ball)
@@ -116,7 +134,8 @@ function initScene(){
     renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.xr.enabled = true;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    document.body.appendChild( renderer.domElement );
+
+	document.body.appendChild( renderer.domElement );
 
     //POINTER MOUSE
     CLICKED = null;
@@ -610,14 +629,74 @@ function setupVR(){
     const button = new VRButton( renderer );
 
     // CONTROLLERS
+	function onSelectStart(event) {
+		this.userData.isSelecting = true;
+		var controller = event.target;
+		var intersections = getIntersections(controller);	// get intersected objects
+	
+		if (intersections.length > 0){
+			var intersection = intersections[ 0 ]; // get the first intersected object
+			var object = intersection.object;
+			changeState(object);
+	
+			// controller.attach(object);
+			// 	controller.userData.selected = object;
+			// 	const id = object.uuid; //getID of clicked object
+			// 	console.log("id " + id);
+		}
+	}
+	
+	function onSelectEnd() {
+		this.userData.isSelecting = false;
+	
+		if ( floor_intersection ) {
+			const baseReferenceSpace = renderer.xr.getReferenceSpace();
+
+			const offsetPosition = { x:  -floor_intersection.x, y:  -floor_intersection.y, z:  -floor_intersection.z, w: 1 };
+			const offsetRotation = new THREE.Quaternion();
+			const transform = new XRRigidTransform( offsetPosition, offsetRotation );
+			
+			// const offsetPosition = camera.position;
+        	// const offsetRotation = camera.rotation;
+        	// const transform = new XRRigidTransform( offsetPosition, offsetRotation );
+        
+			const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
+	
+			renderer.xr.setReferenceSpace( teleportSpaceOffset );
+	
+		}
+	}
+
 	controller1 = renderer.xr.getController( 0 );
-	controller1.name ="left";
+	controller1.name ="right";
 	controller1.addEventListener( 'selectstart', onSelectStart );
+	controller1.addEventListener( 'selectend', onSelectEnd );
+	controller1.addEventListener( 'connected', function ( event ) {
+
+		this.add( buildController( event.data ) );
+
+	} );
+	controller1.addEventListener( 'disconnected', function () {
+
+		this.remove( this.children[ 0 ] );
+
+	} );
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
-	controller2.name ="right";
+	controller2.name ="left";
 	controller2.addEventListener( 'selectstart', onSelectStart );
+	controller2.addEventListener( 'selectend', onSelectEnd );
+	controller2.addEventListener( 'connected', function ( event ) {
+
+		this.add( buildController( event.data ) );
+
+	} );
+	controller2.addEventListener( 'disconnected', function () {
+
+		this.remove( this.children[ 0 ] );
+
+	} );
 	scene.add( controller2 );
 
     const controllerModelFactory = new XRControllerModelFactory();
@@ -632,18 +711,17 @@ function setupVR(){
 	scene.add( controllerGrip2 );
 
 	// DOLLY
-	// var dolly = new THREE.Group();
-    // dolly.position.set(0, 0, 6);
-    // dolly.name = "dolly";
-    // scene.add(dolly);
-    // dolly.add(camera);
-    // dolly.add(controller1);
-    // dolly.add(controller2);
-    // dolly.add(controllerGrip1);
-    // dolly.add(controllerGrip2);
+	var dolly = new THREE.Group();
+    // dolly.position.set(0, 0, 0);
+    dolly.name = "dolly";
+    scene.add(dolly);
+    dolly.add(camera);
+    dolly.add(controller1);
+    dolly.add(controller2);
+    dolly.add(controllerGrip1);
+    dolly.add(controllerGrip2);
 
-    // RAYCASTER
-	raycaster = new THREE.Raycaster();
+    
     const controls = new OrbitControls( camera, renderer.domElement );
 	controls.update();
 
@@ -661,22 +739,35 @@ function setupVR(){
 
 }
 
-function onSelectStart(event) {
-	var controller = event.target;
-	var intersections = getIntersections(controller);	// get intersected objects
 
-	if (intersections.length > 0){
-		var intersection = intersections[ 0 ]; // get the first intersected object
-		var object = intersection.object;
-		changeState(object);
 
-		// controller.attach(object);
-		// controller.userData.selected = object;
-		// const id = object.uuid; //getID of clicked object
-		// console.log("id " + id);
+////////////////
+function buildController( data ) {
+
+	let geometry, material;
+
+	switch ( data.targetRayMode ) {
+
+		case 'tracked-pointer':
+
+			geometry = new THREE.BufferGeometry();
+			geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( [ 0, 0, 0, 0, 0, - 1 ], 3 ) );
+			geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( [ 0.5, 0.5, 0.5, 0, 0, 0 ], 3 ) );
+
+			material = new THREE.LineBasicMaterial( { vertexColors: true, blending: THREE.AdditiveBlending } );
+
+			return new THREE.Line( geometry, material );
+
+		case 'gaze':
+
+			geometry = new THREE.RingGeometry( 0.02, 0.04, 32 ).translate( 0, 0, - 1 );
+			material = new THREE.MeshBasicMaterial( { opacity: 0.5, transparent: true } );
+			return new THREE.Mesh( geometry, material );
+
 	}
-}
 
+}
+////////////////
 
 function getIntersections(controller) {
 	var tempMatrix = new THREE.Matrix4();
@@ -705,7 +796,7 @@ function intersectObjects(controller) {
 
 		line.scale.z = intersection.distance;
 	} else {
-		line.scale.z = 50;   //MODIFIED AS OUR SCENE IS LARGER
+		line.scale.z = 20;   //MODIFIED AS OUR SCENE IS LARGER
 	}
 }
 
@@ -733,13 +824,49 @@ function render() {
 	const delta = clock.getDelta();
 
 	if ( mixer ) {
-	mixer.update( delta );
+		mixer.update( delta );
 	}
 
 	cleanIntersected();
 
 	intersectObjects(controller1);
     intersectObjects(controller2);
-	
+
+	floor_intersection = undefined;
+
+	if ( controller1.userData.isSelecting === true ) {
+
+		floor_tempMatrix.identity().extractRotation( controller1.matrixWorld );
+
+		raycaster.ray.origin.setFromMatrixPosition( controller1.matrixWorld );
+		raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( floor_tempMatrix );
+
+		const floor_intersects = raycaster.intersectObjects( [ floor ] );
+
+			if ( floor_intersects.length > 0 ) {
+
+				floor_intersection = floor_intersects[ 0 ].point;
+
+			}
+
+	} else if ( controller2.userData.isSelecting === true ) {
+
+		floor_tempMatrix.identity().extractRotation( controller2.matrixWorld );
+
+		raycaster.ray.origin.setFromMatrixPosition( controller2.matrixWorld );
+		raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( floor_tempMatrix );
+
+		const floor_intersects = raycaster.intersectObjects( [ floor ] );
+
+		if ( floor_intersects.length > 0 ) {
+			floor_intersection = floor_intersects[ 0 ].point;
+		}
+
+	}
+
+	if ( floor_intersection ) marker.position.copy( floor_intersection );
+
+	marker.visible = floor_intersection !== undefined;
+
 	renderer.render(scene, camera );    
 }
