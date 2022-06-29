@@ -86,7 +86,7 @@ function initScene(){
 	// FLOOR
 	floor = new THREE.Mesh(
 		new THREE.PlaneGeometry( 20, 20, 10, 10 ).rotateX( - Math.PI / 2 ),
-		new THREE.MeshBasicMaterial( { color: 'green', transparent: true, opacity: 0.25 } )
+		new THREE.MeshBasicMaterial( { color: 'grey', transparent: true, opacity: 0.25 } )
 	);
 	scene.add( floor );
 
