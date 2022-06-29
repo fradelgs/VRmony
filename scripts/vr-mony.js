@@ -205,7 +205,7 @@ function initIntonation(){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
-				intonation[i][j][k]=((Math.pow(2, Oct) * f0 * Math.pow(2, ((i-1)*xAxisInterval)/12)) * Math.pow(2, ((j-1)*yAxisInterval)/12))* Math.pow(2, ((k-1)*zAxisInterval)/12);
+				intonation[i][j][k]=(f0 *(Math.pow(2, Oct) * Math.pow(2, ((i-1)*xAxisInterval)/12)) * Math.pow(2, ((j-1)*yAxisInterval)/12))* Math.pow(2, ((k-1)*zAxisInterval)/12);
 			}
 		}
 	}
@@ -222,8 +222,7 @@ function initOscFreqs(){
 			}
 		}
 	}
-
-	return intonation;
+	//return intonation;
 }
 
 function initSoundLattice(){
@@ -310,7 +309,7 @@ function changeState(object){
 
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
-	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp, listener.context.currentTime + 0, 0.5);
+	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
 	//console.log(object.children[lastIndex])
 }
 
@@ -352,9 +351,8 @@ function initGUI(){
 		'y-axis Interval': 'M III',
 		'z-axis Interval': 'm VII',
 		'Octave': 1,
+		'Intonation System': 'Equal Temperament',
 		'SpheresPerEdge': 1,
-		'Intonation System': 'equal',
-		'limit': 2,
 	}
 
 	//folder1.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
@@ -365,8 +363,8 @@ function initGUI(){
 	folder1.add( settings, 'y-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
 	folder1.add( settings, 'z-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
 	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
+	//folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	//folder1.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-	folder1.add( settings, 'Intonation System', 'equal').onChange(intonationSystem);
 
     folder1.open();
 }
@@ -499,17 +497,17 @@ function setWave(a){
 	}
 };
 
-function setLimit(a){
-	SpheresPerEdge = a;
-};
-
-function intonationSystem(a){
+function intonationSystem(system){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
-				switch (a) {
-					case 'equal':
-						intonation[i][j][k] = (Math.pow(2, (i*7)/12)) * Math.pow(2, (j*4)/12)*Math.pow(2, (k*10)/12);
+				switch (system) {
+					case 'Equal Temperament':
+						intonation[i][j][k] = (f0 * Math.pow(2, (i*xAxisInterval)/12)) * Math.pow(2, (j*yAxisInterval)/12)*Math.pow(2, (k*zAxisInterval)/12);
+						break;
+
+					case 'Pythagorean Tuning':
+						intonation[i][j][k] = (f0 * Math.pow(3/2, i) * Math.pow(3/2, 0)*Math.pow(3/2, 0));
 						break;
 				
 					default:
@@ -518,6 +516,9 @@ function intonationSystem(a){
 			}
 		}
 	}
+
+	initOscFreqs();
+	fundGlow();
 }
 
 function setf0(fundNote){
