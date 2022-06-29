@@ -28,7 +28,7 @@ function lets_play(){
 function dont_play(){
 	if (audio.paused == false) {
 		audio.pause();
-		audio.currentTime = 1.5;
+		audio.currentTime = 1.55;
 	
 		random_vinyl = vinyl_scratches[Math.floor(Math.random()*vinyl_scratches.length)];
 		random_vinyl.play();
