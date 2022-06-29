@@ -4,6 +4,7 @@ import { VRButton } from './libs/VRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
 import { GUI } from './libs/three/jsm/dat.gui.module.js';
+import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
 
 let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
 let controller1, controller2;
@@ -339,6 +340,15 @@ function mouseDown(event) {
 }
 
 function initGUI(){
+const gui = new GUI( { width: 300 } );
+			
+
+				const group = new InteractiveGroup( renderer, camera );
+				scene.add( group );
+}
+
+/*
+function initGUI(){
 
 	const panel = new GUI( { width: 400 });
 
@@ -365,9 +375,11 @@ function initGUI(){
 	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
 	//folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	//folder1.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-
     folder1.open();
+
 }
+
+*/
 
 /*function setSpheresPerEdge(NumberOfSpheres){
 	destroyLattice();
