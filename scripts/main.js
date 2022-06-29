@@ -3,7 +3,7 @@ type = "text/javascript";
 var randomVinyl;
 
 var audio = new Audio('audio/lets-get-it-on.m4a');
-
+audio.currentTime = 1.55;
 var vinyl_1 = new Audio('audio/vinyl_needle_1.wav');
 var vinyl_2 = new Audio('audio/vinyl_needle_2.wav');
 var vinyl_3 = new Audio('audio/vinyl_needle_3.wav');
@@ -20,7 +20,6 @@ book.setAttribute('onclick', 'location.href = "vrmony.html"');
 
 function lets_play(){
 	if (audio.paused == true) {
-		audio.currentTime = 1.55;
 		audio.play();
 	}
 }
@@ -28,7 +27,7 @@ function lets_play(){
 function dont_play(){
 	if (audio.paused == false) {
 		audio.pause();
-		audio.currentTime = 1.55;
+		audio.currentTime = audio.currentTime - 0.5;
 	
 		random_vinyl = vinyl_scratches[Math.floor(Math.random()*vinyl_scratches.length)];
 		random_vinyl.play();
