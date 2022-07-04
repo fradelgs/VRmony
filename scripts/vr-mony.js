@@ -64,7 +64,7 @@ function initScene(){
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6, 10);
+    camera.position.set( 0, 1.6, 4);
     // camera.lookAt( 0, 0, 0 );
     camera.add(listener);
 
@@ -609,10 +609,6 @@ function setupVR(){
 			const offsetPosition = { x:  -floor_intersection.x, y:  -floor_intersection.y, z:  -floor_intersection.z, w: 1 };
 			const offsetRotation = new THREE.Quaternion();
 			const transform = new XRRigidTransform( offsetPosition, offsetRotation );
-			
-			// const offsetPosition = camera.position;
-        	// const offsetRotation = camera.rotation;
-        	// const transform = new XRRigidTransform( offsetPosition, offsetRotation );
         
 			const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
 	
@@ -666,7 +662,7 @@ function setupVR(){
 
 	// DOLLY
 	var dolly = new THREE.Group();
-    // dolly.position.set(0, 0, 0);
+    dolly.position.set(0, 0, 6);
     dolly.name = "dolly";
     scene.add(dolly);
     dolly.add(camera);
