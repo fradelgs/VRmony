@@ -4,6 +4,8 @@ import { VRButton } from './libs/VRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
 import { GUI } from './libs/three/jsm/dat.gui.module.js';
+import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
+import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 
 let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
 let controller1, controller2;
@@ -40,6 +42,8 @@ let color = {
 	false: '0xffffff', 
 	true: '0xff00ff'
 };
+
+let group;
 
 const container = document.createElement( 'div' );
 document.body.appendChild( container );
@@ -123,14 +127,12 @@ function initScene(){
 	fundGlow();
 
 	SoundVisualPatching();
-	
-	// GUI
-	initGUI();
 
     // RENDERER
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.xr.enabled = true;
     renderer.outputEncoding = THREE.sRGBEncoding;
 
 	document.body.appendChild( renderer.domElement );
@@ -143,6 +145,9 @@ function initScene(){
 
     document.addEventListener( 'pointerdown', mouseDown, false );
     window.addEventListener('resize', onWindowResize, false );
+
+	// GUI
+	initGUI();
 }
 
 function fundGlow(){
@@ -357,6 +362,32 @@ function mouseDown(event) {
 	}
 }
 
+/*
+
+function initGUI(){
+	const gui = new GUI( { width: 300 } );
+	gui.add( parameters, 'radius', 0.0, 1.0 ).onChange(  );
+	gui.add( parameters, 'tube', 0.0, 1.0 ).onChange(  );
+	gui.add( parameters, 'tubularSegments', 10, 150, 1 ).onChange(  );
+	gui.add( parameters, 'radialSegments', 2, 20, 1 ).onChange(  );
+	gui.add( parameters, 'p', 1, 10, 1 ).onChange(  );
+	gui.add( parameters, 'q', 0, 10, 1 ).onChange(  );
+	gui.add( parameters, 'thickness', 0, 1 ).onChange(  );
+	gui.domElement.style.visibility = 'hidden';
+
+	const group = new InteractiveGroup( renderer, camera );
+	scene.add( group );
+
+	const mesh = new HTMLMesh( gui.domElement );
+	mesh.position.x = - 0.75;
+	mesh.position.y = 1.5;
+	mesh.position.z = - 0.5;
+	mesh.rotation.y = Math.PI / 4;
+	mesh.scale.setScalar( 2 );
+	group.add( mesh );
+}
+*/
+
 function initGUI(){
 
 	const panel = new GUI( { width: 400 });
@@ -384,9 +415,24 @@ function initGUI(){
 	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
 	//folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	//folder1.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-
     folder1.open();
+
+	panel.domElement.style.visibility = 'hidden';
+
+	group = new InteractiveGroup( renderer, camera );
+	const mesh = new HTMLMesh( panel.domElement );
+	mesh.position.x = -8;
+	mesh.position.y = 3;
+	mesh.position.z = 0;
+	mesh.rotation.y = Math.PI/2;
+	mesh.scale.setScalar( 40);
+	group.add( mesh );
+	scene.add( group );
+
+
 }
+
+
 
 /*function setSpheresPerEdge(NumberOfSpheres){
 	destroyLattice();
