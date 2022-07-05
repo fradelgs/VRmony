@@ -60,7 +60,7 @@ class VRButton{
 
     }
 
-	showEnterVR( button, ) {
+	showEnterVR( button ) {
 
         let currentSession = null;
         const self = this;
@@ -125,7 +125,7 @@ class VRButton{
         button.onclick = function () {
 
             if ( currentSession === null ) {
-
+ 
                 // WebXR's requestReferenceSpace only works if the corresponding feature
                 // was requested at session creation time. For simplicity, just ask for
                 // the interesting ones as optional features, but be aware that the
@@ -134,11 +134,11 @@ class VRButton{
                 // be requested separately.)
 
                 navigator.xr.requestSession( self.sessionMode, self.sessionInit ).then( onSessionStarted );
-
+                
             } else {
-
+                
                 currentSession.end();
-
+               
             }
 
         };
