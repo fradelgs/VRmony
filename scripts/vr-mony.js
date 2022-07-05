@@ -3,13 +3,15 @@ import { BoxLineGeometry } from './libs/three/jsm/BoxLineGeometry.js';
 import { VRButton } from './libs/VRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
-import { GUI } from './libs/three/jsm/dat.gui.module.js';
+// import { GUI } from './libs/three/jsm/dat.gui.module.js';
 import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
+import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 
 let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
-let controller1, controller2, controllerGrip1, controllerGrip2;
-let light1, room, floor_marker, floor, line, baseReferenceSpace;
+let controller1, controller2, controllerGrip1, controllerGrip2, line;
+let light1, room, floor_marker, floor, baseReferenceSpace;
+let xline, yline, zline;
 let group;
 let clock;
 let settings;
@@ -65,8 +67,7 @@ function initScene(){
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6, 4);
-    // camera.lookAt( 0, 0, 0 );
+    camera.position.set( 0, 1.6 , 5);
     camera.add(listener);
 
     // ROOM
@@ -76,19 +77,47 @@ function initScene(){
     );
     scene.add(room);
 
-	// MARKER
-	floor_marker = new THREE.Mesh(
-		new THREE.CircleGeometry( 0.25, 32 ).rotateX( - Math.PI / 2 ),
-		new THREE.MeshBasicMaterial( { color: 0x8b0000 } )
-	);
-	scene.add( floor_marker );
+	// REFERENCE SYSTEM
+	const xline_material = new THREE.LineBasicMaterial({color: 'red'});
+	const yline_material = new THREE.LineBasicMaterial({color: 'green'});
+	const zline_material = new THREE.LineBasicMaterial({color: 'blue'});
+
+	const xline_geometry = new THREE.BufferGeometry().setFromPoints([
+		new THREE.Vector3(-10, 3, 0),
+	    new THREE.Vector3(10, 3, 0)
+	]);
+
+	const yline_geometry = new THREE.BufferGeometry().setFromPoints([
+		new THREE.Vector3(0, 0, 0),
+	    new THREE.Vector3(0, 10, 0)
+	]);
+
+	const zline_geometry = new THREE.BufferGeometry().setFromPoints([
+		new THREE.Vector3(0, 3, -10),
+	    new THREE.Vector3(0, 3, 10)
+	]);
+
+	xline = new THREE.Line(xline_geometry, xline_material);
+	yline = new THREE.Line(yline_geometry, yline_material);
+	zline = new THREE.Line(zline_geometry, zline_material);
+
+	scene.add(xline);
+	scene.add(yline);
+	scene.add(zline);
 	
 	// FLOOR
 	floor = new THREE.Mesh(
-		new THREE.PlaneGeometry( 20, 20, 10, 10 ).rotateX( - Math.PI / 2 ),
-		new THREE.MeshBasicMaterial( { color: 'grey', transparent: true, opacity: 0.25 } )
+		new THREE.PlaneGeometry( 16, 16, 2, 2 ).rotateX( - Math.PI / 2 ),
+		new THREE.MeshBasicMaterial( { color: 0x808080, transparent: true, opacity: 0.2 } )
 	);
 	scene.add( floor );
+
+	// FLOOR MARKER
+	floor_marker = new THREE.Mesh(
+		new THREE.CircleGeometry( 0.15, 32 ).rotateX( - Math.PI / 2 ),
+		new THREE.MeshBasicMaterial( { color: 0x808080 } )
+	);
+	scene.add( floor_marker );
 
     // LIGHT
 	const ambienceLight = new THREE.HemisphereLight( 0x606060, 0x404040 );
@@ -104,10 +133,7 @@ function initScene(){
 	
     // LATTICE
     initLatticeNEW();
-	console.log(ball)
-
 	//destroyLattice();
-	console.log(ball)
 
 	initSoundLattice();
 
@@ -129,8 +155,8 @@ function initScene(){
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.outputEncoding = THREE.sRGBEncoding;	
 	renderer.xr.enabled = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
 
 	document.body.appendChild( renderer.domElement );
 
@@ -388,27 +414,26 @@ function initGUI(){
 function initGUI(){
 
 	const panel = new GUI( { width: 400, height: 200 });
-
 	const folder = panel.addFolder( 'Sound Generator' );
 
 	settings = {
-		'Wave Form': 'sine',
-		'Fundamental Frequency': 'C',
-		'x-axis Interval': 'V',
-		'y-axis Interval': 'M III',
-		'z-axis Interval': 'm VII',
+		'waveForm': 'sine',
+		'fundamentalFrequency': 'C',
+		'xaxisInterval': 'V',
+		'yaxisInterval': 'M III',
+		'zaxisInterval': 'm VII',
 		'Octave': 1,
-		'Intonation System': 'Equal Temperament',
-		'SpheresPerEdge': 1,
+		'intonationSystem': 'Equal Temperament',
+		'spheresPerEdge': 1,
 	}
 
 	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
-    folder.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
-	folder.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder.add( settings, 'x-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
-	folder.add( settings, 'y-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
-	folder.add( settings, 'z-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
+    folder.add( settings, 'waveForm', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
+	folder.add( settings, 'fundamentalFrequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
+	folder.add( settings, 'xaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
+	folder.add( settings, 'yaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
+	folder.add( settings, 'zaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
 	folder.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
 	//folder.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	//folder.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
@@ -425,8 +450,6 @@ function initGUI(){
 	mesh.scale.setScalar( 18 );
 	group.add( mesh );
 	scene.add( group );
-
-
 }
 
 
@@ -617,6 +640,43 @@ function setf0(fundNote){
 	fundGlow();
 };
 
+// CONTROLLERS
+function onSelectStart() {
+	this.userData.isSelecting = true;
+
+		// controller.attach(object);
+		// 	controller.userData.selected = object;
+		// 	const id = object.uuid; //getID of clicked object
+		// 	console.log("id " + id);
+
+}
+
+function onSelectEnd(event) {
+	this.userData.isSelecting = false;
+	
+	// BALL SOUND ACTIVATION
+	var controller = event.target;
+	var intersections = getIntersections(controller);	// get intersected objects
+
+	if (intersections.length > 0){
+		var intersection = intersections[ 0 ]; // get the first intersected object
+		var object = intersection.object;
+		changeState(object);
+	}
+
+	//TELEPORT
+	baseReferenceSpace = renderer.xr.getReferenceSpace();
+
+	if ( floor_intersection ) {
+	
+		const offsetPosition = { x:  -floor_intersection.x, y:  -floor_intersection.y, z:  -floor_intersection.z, w: 1 };
+		const offsetRotation = new THREE.Quaternion();
+		const transform = new XRRigidTransform( offsetPosition, offsetRotation );
+		const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
+		
+		renderer.xr.setReferenceSpace( teleportSpaceOffset );
+	}
+}
 
 function setupVR(){
     renderer.xr.enabled = true;
@@ -624,43 +684,9 @@ function setupVR(){
     // VR BUTTON
     const button = new VRButton( renderer );
 
-    // CONTROLLERS
-	function onSelectStart(event) {
-		this.userData.isSelecting = true;
-		var controller = event.target;
-		var intersections = getIntersections(controller);	// get intersected objects
-	
-		if (intersections.length > 0){
-			var intersection = intersections[ 0 ]; // get the first intersected object
-			var object = intersection.object;
-			changeState(object);
-	
-			// controller.attach(object);
-			// 	controller.userData.selected = object;
-			// 	const id = object.uuid; //getID of clicked object
-			// 	console.log("id " + id);
-		}
-	}
-	
-	function onSelectEnd() {
-		this.userData.isSelecting = false;
-		baseReferenceSpace = renderer.xr.getReferenceSpace();
-		if ( floor_intersection ) {
-			
-
-			const offsetPosition = { x:  -floor_intersection.x, y:  -floor_intersection.y, z:  -floor_intersection.z, w: 1 };
-			const offsetRotation = new THREE.Quaternion();
-			const transform = new XRRigidTransform( offsetPosition, offsetRotation );
-        
-			const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
-	
-			renderer.xr.setReferenceSpace( teleportSpaceOffset );
-	
-		}
-	}
-
+    //CONTROLLERs
 	controller1 = renderer.xr.getController( 0 );
-	controller1.name ="right";
+	controller1.name = "right";
 	controller1.addEventListener( 'selectstart', onSelectStart );
 	controller1.addEventListener( 'selectend', onSelectEnd );
 	controller1.addEventListener( 'connected', function ( event ) {
@@ -676,7 +702,7 @@ function setupVR(){
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
-	controller2.name ="left";
+	controller2.name = "left";
 	controller2.addEventListener( 'selectstart', onSelectStart );
 	controller2.addEventListener( 'selectend', onSelectEnd );
 	controller2.addEventListener( 'connected', function ( event ) {
@@ -704,7 +730,6 @@ function setupVR(){
 
 	// DOLLY
 	var dolly = new THREE.Group();
-    dolly.position.set(0, 0, 6);
     dolly.name = "dolly";
     scene.add(dolly);
     dolly.add(camera);
@@ -712,27 +737,28 @@ function setupVR(){
     dolly.add(controller2);
     dolly.add(controllerGrip1);
     dolly.add(controllerGrip2);
+	dolly.position.set(0, 0, 6);
 
     
-    const controls = new OrbitControls( camera, renderer.domElement );
-	controls.update();
+    // const controls = new OrbitControls( camera, renderer.domElement );
+	// controls.update();
 
-	var geometry = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0, 0, -1)
-    ]);
+	// // // var geometry = new THREE.BufferGeometry().setFromPoints([
+    // // //     new THREE.Vector3(0, 0, 0),
+    // // //     new THREE.Vector3(0, 0, -1)
+    // // // ]);
 
-    line = new THREE.Line(geometry);
-    line.name = "line";
+    // // // line = new THREE.Line(geometry);
+    // // // line.name = "line";
 
-    controller1.add(line.clone());
-    controller2.add(line.clone());
+    // // // controller1.add(line.clone());
+    // // // controller2.add(line.clone());
 
 }
 
 
 
-////////////////
+
 function buildController( data ) {
 
 	let geometry, material;
@@ -758,7 +784,7 @@ function buildController( data ) {
 	}
 
 }
-////////////////
+
 
 function getIntersections(controller) {
 	var tempMatrix = new THREE.Matrix4();
@@ -774,7 +800,7 @@ function intersectObjects(controller) {
 
 	if (controller.userData.selected !== undefined) return;
 
-	var line = controller.getObjectByName("line");
+	// // // var line = controller.getObjectByName("line");
 	var intersections = getIntersections(controller);
 
 	if (intersections.length > 0) {
@@ -785,7 +811,7 @@ function intersectObjects(controller) {
 		object.material.emissiveIntensity = 1;
 		intersected.push(object);
 
-		line.scale.z = intersection.distance;
+		// // // line.scale.z = intersection.distance;
 	}
 }
 
@@ -834,7 +860,7 @@ function render() {
 
 			if ( floor_intersects.length > 0 ) {
 				floor_intersection = floor_intersects[ 0 ].point;
-				line.scale.z = floor_intersection.distance;
+				// // // line.scale.z = floor_intersection.distance;
 
 			}
 
@@ -849,7 +875,7 @@ function render() {
 
 		if ( floor_intersects.length > 0 ) {
 			floor_intersection = floor_intersects[ 0 ].point;
-			line.scale.z = floor_intersection.distance;
+			// // // line.scale.z = floor_intersection.distance;
 		}
 
 	}
