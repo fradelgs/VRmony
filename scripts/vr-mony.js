@@ -8,9 +8,10 @@ import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
 import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 
 let camera, listener, scene, raycaster, renderer, pointer, CLICKED;
-let controller1, controller2;
-let controllerGrip1, controllerGrip2;
-let room, marker, floor, baseReferenceSpace;
+let controller1, controller2, controllerGrip1, controllerGrip2;
+let light1, room, floor_marker, floor, line, baseReferenceSpace;
+let group;
+let clock;
 let settings;
 let spherePosition;
 let BallDistance = 2; // Distance between two balls
@@ -20,17 +21,16 @@ let oscillator = new Array(SpheresPerEdge);
 let gainNode = [];
 let intonation = new Array(SpheresPerEdge);
 let mixer;
-let light1;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 1;
 let k = 100;
 let t = k * (1/f0);
-let normAmp = 1/Math.pow(SpheresPerEdge, 3); //normalizzazione del volume
+let normAmp = 1/Math.pow(SpheresPerEdge, 3); //volume normalization
 let xAxisInterval = 7; //Fifths default
 let yAxisInterval = 4; //Maj.Thirds default
-let zAxisInterval = 10; // min. Seventh default
+let zAxisInterval = 10; // min.Seventh default
 
 let intersected = [];
 let floor_intersection;
@@ -43,13 +43,10 @@ let color = {
 	true: '0xff00ff'
 };
 
-let group;
 
 const container = document.createElement( 'div' );
 document.body.appendChild( container );
         
-let clock;
-
 initScene();
 animate();
 setupVR();
@@ -77,15 +74,14 @@ function initScene(){
         new BoxLineGeometry( 20, 10, 20, 10, 10, 10 ).translate( 0, 5, 0 ),
         new THREE.LineBasicMaterial( { color: 0x808080 } )
     );
-    
     scene.add(room);
 
 	// MARKER
-	marker = new THREE.Mesh(
+	floor_marker = new THREE.Mesh(
 		new THREE.CircleGeometry( 0.25, 32 ).rotateX( - Math.PI / 2 ),
 		new THREE.MeshBasicMaterial( { color: 0x8b0000 } )
 	);
-	scene.add( marker );
+	scene.add( floor_marker );
 	
 	// FLOOR
 	floor = new THREE.Mesh(
@@ -115,7 +111,8 @@ function initScene(){
 
 	initSoundLattice();
 
-	Lattice.position.set(-0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
+	Lattice.position.set(-BallDistance, 0.5*BallDistance,-BallDistance);
+	// -0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
 	// Creation of Lattice "Metadata"
 	Lattice.name = "Lattice"; // per intersect nel raycaster!
 	
@@ -390,9 +387,9 @@ function initGUI(){
 
 function initGUI(){
 
-	const panel = new GUI( { width: 400 });
+	const panel = new GUI( { width: 400, height: 200 });
 
-	const folder1 = panel.addFolder( 'Sound Generator' );
+	const folder = panel.addFolder( 'Sound Generator' );
 
 	settings = {
 		'Wave Form': 'sine',
@@ -405,33 +402,32 @@ function initGUI(){
 		'SpheresPerEdge': 1,
 	}
 
-	//folder1.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
+	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
-    folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
-	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder1.add( settings, 'x-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
-	folder1.add( settings, 'y-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
-	folder1.add( settings, 'z-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
-	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
-	//folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
-	//folder1.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-    folder1.open();
+    folder.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
+	folder.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
+	folder.add( settings, 'x-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
+	folder.add( settings, 'y-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
+	folder.add( settings, 'z-axis Interval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
+	folder.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
+	//folder.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
+	//folder.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
+    folder.open();
 
 	panel.domElement.style.visibility = 'hidden';
 
 	group = new InteractiveGroup( renderer, camera );
 	const mesh = new HTMLMesh( panel.domElement );
-	mesh.position.x = -8;
-	mesh.position.y = 3;
+	mesh.position.x = -9;
+	mesh.position.y = 4;
 	mesh.position.z = 0;
 	mesh.rotation.y = Math.PI/2;
-	mesh.scale.setScalar( 40);
+	mesh.scale.setScalar( 18 );
 	group.add( mesh );
 	scene.add( group );
 
 
 }
-
 
 
 /*function setSpheresPerEdge(NumberOfSpheres){
@@ -648,9 +644,9 @@ function setupVR(){
 	
 	function onSelectEnd() {
 		this.userData.isSelecting = false;
-	
+		baseReferenceSpace = renderer.xr.getReferenceSpace();
 		if ( floor_intersection ) {
-			const baseReferenceSpace = renderer.xr.getReferenceSpace();
+			
 
 			const offsetPosition = { x:  -floor_intersection.x, y:  -floor_intersection.y, z:  -floor_intersection.z, w: 1 };
 			const offsetRotation = new THREE.Quaternion();
@@ -726,9 +722,8 @@ function setupVR(){
         new THREE.Vector3(0, 0, -1)
     ]);
 
-    var line = new THREE.Line(geometry);
+    line = new THREE.Line(geometry);
     line.name = "line";
-    line.scale.z = 50;   //MODIFIED FOR LARGER SCENE
 
     controller1.add(line.clone());
     controller2.add(line.clone());
@@ -791,8 +786,6 @@ function intersectObjects(controller) {
 		intersected.push(object);
 
 		line.scale.z = intersection.distance;
-	} else {
-		line.scale.z = 20;   //MODIFIED AS OUR SCENE IS LARGER
 	}
 }
 
@@ -840,8 +833,8 @@ function render() {
 		const floor_intersects = raycaster.intersectObjects( [ floor ] );
 
 			if ( floor_intersects.length > 0 ) {
-
 				floor_intersection = floor_intersects[ 0 ].point;
+				line.scale.z = floor_intersection.distance;
 
 			}
 
@@ -856,13 +849,14 @@ function render() {
 
 		if ( floor_intersects.length > 0 ) {
 			floor_intersection = floor_intersects[ 0 ].point;
+			line.scale.z = floor_intersection.distance;
 		}
 
 	}
 
-	if ( floor_intersection ) marker.position.copy( floor_intersection );
+	if ( floor_intersection ) floor_marker.position.copy( floor_intersection );
 
-	marker.visible = floor_intersection !== undefined;
+	floor_marker.visible = floor_intersection !== undefined;
 
 	renderer.render(scene, camera );    
 }
