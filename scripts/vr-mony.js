@@ -13,7 +13,7 @@ let controller1, controller2, controllerGrip1, controllerGrip2, line;
 let light1, room, floor_marker, floor, baseReferenceSpace;
 let xline, yline, zline;
 let group;
-let clock;
+let clock = new THREE.Clock();
 let settings;
 let spherePosition;
 let BallDistance = 2; // Distance between two balls
@@ -163,14 +163,13 @@ function initScene(){
     //POINTER MOUSE
     CLICKED = null;
     pointer= new THREE.Vector2();
-
-	clock = new THREE.Clock();
-
+	
     document.addEventListener( 'pointerdown', mouseDown, false );
-    window.addEventListener('resize', onWindowResize, false );
 
 	// GUI
 	initGUI();
+
+	window.addEventListener('resize', onWindowResize, false );
 }
 
 function fundGlow(){
@@ -414,42 +413,47 @@ function initGUI(){
 function initGUI(){
 
 	const panel = new GUI( { width: 400, height: 200 });
-	const folder = panel.addFolder( 'Sound Generator' );
+	const folder1 = panel.addFolder( 'Sound Generator' );
+	const folder2 = panel.addFolder( 'Intervals' );
 
 	settings = {
-		'waveForm': 'sine',
-		'fundamentalFrequency': 'C',
-		'xaxisInterval': 'V',
-		'yaxisInterval': 'M III',
-		'zaxisInterval': 'm VII',
+		'Wave Form': 'sine',
+		'Fundamental Frequency': 'C',
+		'x-axis': 'V' ,
+		'y-axis': 'M III',
+		'z-axis': 'm VII',
 		'Octave': 1,
-		'intonationSystem': 'Equal Temperament',
-		'spheresPerEdge': 1,
+		// 'Intonation System': 'Equal Temperament',
+		// 'SpheresPerEdge': 1,
 	}
 
 	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
-    folder.add( settings, 'waveForm', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
-	folder.add( settings, 'fundamentalFrequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder.add( settings, 'xaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
-	folder.add( settings, 'yaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
-	folder.add( settings, 'zaxisInterval', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
-	folder.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
+    folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(value => {setWave(value)});
+	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(value => {setf0(value)});
+	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
+	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setXaxis(value)});
+	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setYaxis(value)});
+	folder2.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setZaxis(value)});
+	
 	//folder.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	//folder.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-    folder.open();
+    // folder1.open();
+	// folder2.open();
 
 	panel.domElement.style.visibility = 'hidden';
 
 	group = new InteractiveGroup( renderer, camera );
+	scene.add( group );
+
 	const mesh = new HTMLMesh( panel.domElement );
 	mesh.position.x = -9;
-	mesh.position.y = 4;
-	mesh.position.z = 0;
+	mesh.position.y = 5;
+	mesh.position.z = 5;
 	mesh.rotation.y = Math.PI/2;
 	mesh.scale.setScalar( 18 );
 	group.add( mesh );
-	scene.add( group );
+	
 }
 
 
@@ -467,6 +471,7 @@ function setOctave(octave){
 }
 
 function setXaxis(interval){
+	console.log(Oct);
 	switch (interval) {
 		case 'm II': xAxisInterval = 1;
 			break;
@@ -740,8 +745,8 @@ function setupVR(){
 	dolly.position.set(0, 0, 6);
 
     
-    // const controls = new OrbitControls( camera, renderer.domElement );
-	// controls.update();
+    const controls = new OrbitControls( camera, renderer.domElement );
+	controls.update();
 
 	// // // var geometry = new THREE.BufferGeometry().setFromPoints([
     // // //     new THREE.Vector3(0, 0, 0),
@@ -755,9 +760,6 @@ function setupVR(){
     // // // controller2.add(line.clone());
 
 }
-
-
-
 
 function buildController( data ) {
 
@@ -798,9 +800,9 @@ function getIntersections(controller) {
 function intersectObjects(controller) {
 	// Do not highlight when already selected
 
-	if (controller.userData.selected !== undefined) return;
+	// if (controller.userData.selected !== undefined) return;
 
-	// // // var line = controller.getObjectByName("line");
+	var line = controller.getObjectByName("line");
 	var intersections = getIntersections(controller);
 
 	if (intersections.length > 0) {
@@ -811,7 +813,7 @@ function intersectObjects(controller) {
 		object.material.emissiveIntensity = 1;
 		intersected.push(object);
 
-		// // // line.scale.z = intersection.distance;
+		// line.scale.z = intersection.distance;
 	}
 }
 
@@ -884,5 +886,6 @@ function render() {
 
 	floor_marker.visible = floor_intersection !== undefined;
 
-	renderer.render(scene, camera );    
+	renderer.render(scene, camera );  
+ 
 }
