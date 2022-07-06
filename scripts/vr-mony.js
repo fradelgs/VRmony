@@ -8,6 +8,15 @@ import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 
+////////////////////////////////////////////////////////////////////////////////
+// Polyfill provides support for mobile devices and devicec which only support WebVR
+import {QueryArgs} from './libs/query-args.js';
+import WebXRPolyfill from './libs/webxr-polyfill.module.js';
+      if (QueryArgs.getBool('usePolyfill', true)) {
+        let polyfill = new WebXRPolyfill();
+      }
+///////////////////////////////////////////////////////////////////////////////
+
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
 let controller1, controller2, controllerGrip1, controllerGrip2, line;
 let light1, room, floor_marker, floor, baseReferenceSpace;
@@ -35,8 +44,8 @@ let yAxisInterval = 4; //Maj.Thirds default
 let zAxisInterval = 10; // min.Seventh default
 
 let intersected = [];
-let floor_intersection;
-const floor_tempMatrix = new THREE.Matrix4();
+// let floor_intersection;
+// const floor_tempMatrix = new THREE.Matrix4();
 
 let sound = [];
 
@@ -67,8 +76,7 @@ function initScene(){
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6 , 6);
-	camera.lookAt(0, 3, 0);
+    camera.position.set( 0, 1.6 , 4);
     camera.add(listener);
 
     // ROOM
@@ -110,7 +118,7 @@ function initScene(){
 
 	// FLOOR
 	floor = new THREE.Mesh(
-		new THREE.PlaneGeometry( 15, 15, 2, 2 ).rotateX( -Math.PI / 2 ),
+		new THREE.PlaneGeometry( 16, 16, 2, 2 ).rotateX( -Math.PI / 2 ),
 		new THREE.MeshBasicMaterial( { color: 0x808080, transparent: true, opacity: 0.2 } )
 	);
 	// scene.add( floor );
@@ -142,6 +150,7 @@ function initScene(){
 
 	Lattice.position.set(-BallDistance, 0.5*BallDistance,-BallDistance);
 	// -0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
+
 	// Creation of Lattice "Metadata"
 	Lattice.name = "Lattice"; // per intersect nel raycaster!
 
@@ -171,10 +180,12 @@ function initScene(){
 
     document.addEventListener( 'pointerdown', mouseDown, false );
 
+	// SYSTEM - for centering
 	var system = new THREE.Group();
 	scene.add(system);
 	system.add(ref_syst, room, floor, Lattice);
 	system.position.set(0,0,-6);
+
 
 	// GUI
 	initGUI();
@@ -394,31 +405,6 @@ function mouseDown(event) {
 	}
 }
 
-/*
-
-function initGUI(){
-	const gui = new GUI( { width: 300 } );
-	gui.add( parameters, 'radius', 0.0, 1.0 ).onChange(  );
-	gui.add( parameters, 'tube', 0.0, 1.0 ).onChange(  );
-	gui.add( parameters, 'tubularSegments', 10, 150, 1 ).onChange(  );
-	gui.add( parameters, 'radialSegments', 2, 20, 1 ).onChange(  );
-	gui.add( parameters, 'p', 1, 10, 1 ).onChange(  );
-	gui.add( parameters, 'q', 0, 10, 1 ).onChange(  );
-	gui.add( parameters, 'thickness', 0, 1 ).onChange(  );
-	gui.domElement.style.visibility = 'hidden';
-
-	const group = new InteractiveGroup( renderer, camera );
-	scene.add( group );
-
-	const mesh = new HTMLMesh( gui.domElement );
-	mesh.position.x = - 0.75;
-	mesh.position.y = 1.5;
-	mesh.position.z = - 0.5;
-	mesh.rotation.y = Math.PI / 4;
-	mesh.scale.setScalar( 2 );
-	group.add( mesh );
-}
-*/
 
 function initGUI(){
 
@@ -432,20 +418,20 @@ function initGUI(){
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',
-		'Octave': 1,
+		'Octave': 2,
 		'Intonation System': 'Equal Temperament',
 		'SpheresPerEdge': 1,
 	}
 
 	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
-    folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(value => {setWave(value)});
-	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(value => {setf0(value)});
+    folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
+	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
 	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
 	// folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
-	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setXaxis(value)});
-	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setYaxis(value)});
-	folder2.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(value => {setZaxis(value)});
+	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
+	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
+	folder2.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
 	// folder2.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
     folder1.open();
 	folder2.open();
@@ -455,13 +441,13 @@ function initGUI(){
 	// group = new InteractiveGroup(renderer, camera);
 	// scene.add( group );
 
-	const mesh = new HTMLMesh( panel.domElement );
-	mesh.position.x = -9;
-	mesh.position.y = 2.5;
-	mesh.position.z = -1;
-	mesh.rotation.y = Math.PI/2;
-	mesh.scale.setScalar( 15 );
-	scene.add(mesh);
+	// const mesh = new HTMLMesh( panel.domElement );
+	// mesh.position.x = -9;
+	// mesh.position.y = 2.5;
+	// mesh.position.z = -1;
+	// mesh.rotation.y = Math.PI/2;
+	// mesh.scale.setScalar( 15 );
+	// scene.add(mesh);
 	// group.add(mesh);
 
 }
@@ -597,6 +583,7 @@ function setWave(a){
 	}
 };
 
+/*
 function intonationSystem(system){
 	for(var i = 0; i<SpheresPerEdge; i++){
 		for(var j = 0; j<SpheresPerEdge; j++){
@@ -620,6 +607,7 @@ function intonationSystem(system){
 	initOscFreqs();
 	fundGlow();
 }
+*/
 
 function setf0(fundNote){
 	switch (fundNote) {
@@ -680,18 +668,18 @@ function onSelectEnd(event) {
 		changeState(object);
 	}
 
-	//TELEPORT
-	baseReferenceSpace = renderer.xr.getReferenceSpace();
+	// //TELEPORT
+	// baseReferenceSpace = renderer.xr.getReferenceSpace();
 
-	if ( floor_intersection ) {
-
-		const offsetPosition = { x:  -floor_intersection.x , y:  -floor_intersection.y, z:  -floor_intersection.z-3 , w: 1 };
-		const offsetRotation = new THREE.Quaternion();
-		const transform = new XRRigidTransform( offsetPosition, offsetRotation );
-		const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
-		// controls.update();
-		renderer.xr.setReferenceSpace( teleportSpaceOffset );
-	}
+	// if ( floor_intersection ) {
+	// 	const offsetPosition = { x:  -floor_intersection.x , y:  -floor_intersection.y, z:  -floor_intersection.z , w: 1 };
+	// 	const offsetRotation = new THREE.Quaternion();
+		
+	// 	const transform = new XRRigidTransform( offsetPosition, offsetRotation );
+	// 	const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace( transform );
+	// 	// controls.update();
+	// 	renderer.xr.setReferenceSpace( teleportSpaceOffset );
+	// }
 }
 
 function setupVR(){
@@ -699,6 +687,14 @@ function setupVR(){
 
     // VR BUTTON
     const button = new VRButton( renderer);
+
+	// const group = new InteractiveGroup( renderer, camera );
+	// scene.add( group );
+	// const mesh = new HTMLMesh(button.dom);
+	// mesh.scale.setScalar( 100 );
+	// htmlMesh.position.set(-2, 0, 0)
+	// mesh.rotation.y = Math.PI/2;
+	// group.add(mesh);
 
     //CONTROLLERs
 	controller1 = renderer.xr.getController( 0 );
@@ -745,14 +741,14 @@ function setupVR(){
 	scene.add( controllerGrip2 );
 
 	// DOLLY
-	var dolly = new THREE.Group();
-    scene.add(dolly);
-    dolly.attach(camera);
-    dolly.attach(controller1);
-    dolly.attach(controller2);
-    dolly.attach(controllerGrip1);
-    dolly.attach(controllerGrip2);
-	// dolly.position.set(0, 0, 6);
+	// var dolly = new THREE.Group();
+    // scene.add(dolly);
+    // dolly.add(camera);
+    // dolly.add(controller1);
+    // dolly.add(controller2);
+    // dolly.add(controllerGrip1);
+    // dolly.add(controllerGrip2);
+	// dolly.position.set(0, 0, 0);
 
 
 	// // // var geometry = new THREE.BufferGeometry().setFromPoints([
@@ -855,39 +851,40 @@ function render() {
 	intersectObjects(controller1);
     intersectObjects(controller2);
 
-	floor_intersection = undefined;
+	// // TELEPORT - FLOOR INTERSECTION
+	// floor_intersection = undefined;
 
-	if ( controller1.userData.isSelecting === true ) {
+	// if ( controller1.userData.isSelecting === true ) {
 
-		floor_tempMatrix.identity().extractRotation( controller1.matrixWorld );
+	// 	floor_tempMatrix.identity().extractRotation( controller1.matrixWorld );
 
-		raycaster.ray.origin.setFromMatrixPosition( controller1.matrixWorld );
-		raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( floor_tempMatrix );
+	// 	raycaster.ray.origin.setFromMatrixPosition( controller1.matrixWorld );
+	// 	raycaster.ray.direction.set( 0, 0, -1 ).applyMatrix4( floor_tempMatrix );
 
-		const floor_intersects = raycaster.intersectObjects( [ floor ] );
+	// 	const floor_intersects = raycaster.intersectObjects( [ floor ] );
 
-			if ( floor_intersects.length > 0 ) {
-				floor_intersection = floor_intersects[ 0 ].point;
-			}
+	// 		if ( floor_intersects.length > 0 ) {
+	// 			floor_intersection = floor_intersects[ 0 ].point;
+	// 		}
 
-	} else if ( controller2.userData.isSelecting === true ) {
+	// } else if ( controller2.userData.isSelecting === true ) {
 
-		floor_tempMatrix.identity().extractRotation( controller2.matrixWorld );
+	// 	floor_tempMatrix.identity().extractRotation( controller2.matrixWorld );
 
-		raycaster.ray.origin.setFromMatrixPosition( controller2.matrixWorld );
-		raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( floor_tempMatrix );
+	// 	raycaster.ray.origin.setFromMatrixPosition( controller2.matrixWorld );
+	// 	raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( floor_tempMatrix );
 
-		const floor_intersects = raycaster.intersectObjects( [ floor ] );
+	// 	const floor_intersects = raycaster.intersectObjects( [ floor ] );
 
-		if ( floor_intersects.length > 0 ) {
-			floor_intersection = floor_intersects[ 0 ].point;
-		}
+	// 	if ( floor_intersects.length > 0 ) {
+	// 		floor_intersection = floor_intersects[ 0 ].point;
+	// 	}
 
-	}
+	// }
 
-	if ( floor_intersection ) floor_marker.position.copy( floor_intersection );
+	// if ( floor_intersection ) floor_marker.position.copy( floor_intersection );
 
-	floor_marker.visible = floor_intersection !== undefined;
+	// floor_marker.visible = floor_intersection !== undefined;
 
 	renderer.render(scene, camera );
 
