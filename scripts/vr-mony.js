@@ -3,10 +3,11 @@ import { BoxLineGeometry } from './libs/three/jsm/BoxLineGeometry.js';
 import { VRButton } from './libs/VRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
-// import { GUI } from './libs/three/jsm/dat.gui.module.js';
+import { GUI } from './libs/three/jsm/dat.gui.module.js';
 import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
-import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
+//import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
+//import { FontLoader } from './jsm/loaders/FontLoader.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Polyfill provides support for mobile devices and devicec which only support WebVR
@@ -34,14 +35,19 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let f0 = 65.406; //Lattice Fundamental Frequency
-let Oct = 1;
+let f0 = 32.703; //Lattice Fundamental Frequency
+let Oct = 3;
 let k = 100;
 let t = k * (1/f0);
 let normAmp = 1/Math.pow(SpheresPerEdge, 3); //volume normalization
 let xAxisInterval = 7; //Fifths default
 let yAxisInterval = 4; //Maj.Thirds default
 let zAxisInterval = 10; // min.Seventh default
+let xColor = '#ff0000';
+let yColor = '#00ff00';
+let zColor = '#0000ff';
+
+
 
 let intersected = [];
 // let floor_intersection;
@@ -87,14 +93,16 @@ function initScene(){
     // scene.add(room);
 
 	// REFERENCE SYSTEM
-	const xline_material = new THREE.LineBasicMaterial({color: 'red'});
-	const yline_material = new THREE.LineBasicMaterial({color: 'green'});
-	const zline_material = new THREE.LineBasicMaterial({color: 'blue'});
+	const xline_material = new THREE.LineBasicMaterial({color: xColor});
+	const yline_material = new THREE.LineBasicMaterial({color: yColor});
+	const zline_material = new THREE.LineBasicMaterial({color: zColor});
 
 	const xline_geometry = new THREE.BufferGeometry().setFromPoints([
 		new THREE.Vector3(-10, 3, 0),
 	    new THREE.Vector3(10, 3, 0)
 	]);
+
+	console.log(xline_geometry)
 
 	const yline_geometry = new THREE.BufferGeometry().setFromPoints([
 		new THREE.Vector3(0, 0, 0),
@@ -405,12 +413,13 @@ function mouseDown(event) {
 	}
 }
 
-
 function initGUI(){
 
 	const panel = new GUI( { width: 500, height: 200 });
 	const folder1 = panel.addFolder( 'Sound Generator' );
-	const folder2 = panel.addFolder( 'Intervals' );
+	const folder2 = panel.addFolder( 'Axis Interval' );
+	const folder3 = panel.addFolder( 'Axis Color' );
+
 
 	settings = {
 		'Wave Form': 'sine',
@@ -418,23 +427,33 @@ function initGUI(){
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',
-		'Octave': 4,
+		'Octave': 3,
 		'Intonation System': 'Equal Temperament',
-		'SpheresPerEdge': 1,
+		'SpheresPerEdge': 1,	
+		'x-axis color': '#ff0000',
+		'y-axis color': '#00ff00',
+		'z-axis color': '#0000ff',
 	}
 
 	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder1.add( settings, 'Octave', 2, 7, 1 ).onChange(setOctave);
+	folder1.add( settings, 'Octave', 1, 6, 1 ).onChange(setOctave);
 	// folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
 	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
 	folder2.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
 	// folder2.add( settings, 'SpheresPerEdge', 1, 3, 1 ).onChange(setSpheresPerEdge);
-    folder1.open();
+	folder3.addColor(settings, 'x-axis color').onChange(changeXaxisColor);
+	folder3.addColor(settings, 'y-axis color').onChange(changeYaxisColor);
+	folder3.addColor(settings, 'z-axis color').onChange(changeZaxisColor);
+
+	
+	folder1.open();
 	folder2.open();
+	folder3.open();
+
 
 	panel.domElement.style.visibility = 'visible';
 
@@ -450,6 +469,8 @@ function initGUI(){
 	// scene.add(mesh);
 	// group.add(mesh);
 
+	console.log(panel.__ul.children[1])
+
 }
 
 /*
@@ -461,10 +482,25 @@ function setSpheresPerEdge(NumberOfSpheres){
 */
 
 function setOctave(octave){
-	Oct = octave-2;
+	Oct = octave;
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
+}
+
+function changeXaxisColor(color){
+	xColor = color;
+	xline.material.color.set(xColor) ;
+}
+
+function changeYaxisColor(color){
+	yColor = color;
+	yline.material.color.set(yColor) ;
+}
+
+function changeZaxisColor(color){
+	zColor = color;
+	zline.material.color.set(zColor) ;
 }
 
 function setXaxis(interval){
