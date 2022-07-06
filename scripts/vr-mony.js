@@ -408,7 +408,7 @@ function mouseDown(event) {
 
 function initGUI(){
 
-	const panel = new GUI( { width: 500, height: 200 });
+	const panel = new GUI( { width: window.innerWidth/4, height: window.innerHeight});
 	const folder1 = panel.addFolder( 'Sound Generator' );
 	const folder2 = panel.addFolder( 'Intervals' );
 
