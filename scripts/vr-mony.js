@@ -418,7 +418,7 @@ function initGUI(){
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',
-		'Octave': 2,
+		'Octave': 4,
 		'Intonation System': 'Equal Temperament',
 		'SpheresPerEdge': 1,
 	}
@@ -427,7 +427,7 @@ function initGUI(){
 
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
-	folder1.add( settings, 'Octave', 0, 6, 1 ).onChange(setOctave);
+	folder1.add( settings, 'Octave', 2, 7, 1 ).onChange(setOctave);
 	// folder1.add( settings, 'Intonation System', ['Equal Temperament', 'Pythagorean tuning']).onChange(intonationSystem);
 	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
 	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
@@ -461,14 +461,13 @@ function setSpheresPerEdge(NumberOfSpheres){
 */
 
 function setOctave(octave){
-	Oct = octave;
+	Oct = octave-2;
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
 }
 
 function setXaxis(interval){
-	console.log(Oct);
 	switch (interval) {
 		case 'm II': xAxisInterval = 1;
 			break;
