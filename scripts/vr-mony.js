@@ -7,7 +7,7 @@ import { GUI } from './libs/three/jsm/dat.gui.module.js';
 // import { InteractiveGroup } from './libs/three/jsm/InteractiveGroup.js';
 // import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 // import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
-import { FontLoader } from './libs/three/jsm/FontLoader.js';
+import { FontLoader } from './libs/three/jsm/loaders/FontLoader.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 // Polyfill provides support for mobile devices and devicec which only support WebVR
@@ -170,8 +170,6 @@ function initScene(){
 
 	initSoundLattice();
 
-	initFont();
-
 	Lattice.position.set(-BallDistance, 0.5*BallDistance,-BallDistance);
 	// -0.5*(SpheresPerEdge),0.8,-0.5*(SpheresPerEdge + BallDistance)); // trovare position in f(SpheresPerEdge e distanza d)
 
@@ -214,7 +212,33 @@ function initScene(){
 	// GUI
 	initGUI();
 
+	loadingFonts();
+
 	window.addEventListener('resize', onWindowResize, false );
+}
+
+function loadingFonts(){
+const loader = new FontLoader();
+const font = loader.load(
+	// resource URL
+	'fonts/helvetiker_bold.typeface.json',
+
+	// onLoad callback
+	function ( font ) {
+		// do something with the font
+		console.log( font );
+	},
+
+	// onProgress callback
+	function ( xhr ) {
+		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	},
+
+	// onError callback
+	function ( err ) {
+		console.log( 'An error happened' );
+	}
+);
 }
 
 function fundGlow(){
@@ -303,91 +327,6 @@ function initIntonation(){
 
 	return intonation;
 }
-
-function initFont(){
-
-	const loader = new FontLoader();
-				loader.load( './libs/three/fonts/helvetiker_regular.typeface.json', function ( font ) {
-
-					const color = 0x006699;
-
-					const matDark = new THREE.LineBasicMaterial( {
-						color: color,
-						side: THREE.DoubleSide
-					} );
-
-					const matLite = new THREE.MeshBasicMaterial( {
-						color: color,
-						transparent: true,
-						opacity: 0.4,
-						side: THREE.DoubleSide
-					} );
-
-					const message = '   Three.js\nSimple text.';
-
-					const shapes = font.generateShapes( message, 100 );
-
-					const geometry = new THREE.ShapeGeometry( shapes );
-
-					geometry.computeBoundingBox();
-
-					const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-
-					geometry.translate( xMid, 0, 0 );
-
-					// make shape ( N.B. edge view not visible )
-
-					const text = new THREE.Mesh( geometry, matLite );
-					text.position.z = - 150;
-					scene.add( text );
-
-					// make line shape ( N.B. edge view remains visible )
-
-					const holeShapes = [];
-
-					for ( let i = 0; i < shapes.length; i ++ ) {
-
-						const shape = shapes[ i ];
-
-						if ( shape.holes && shape.holes.length > 0 ) {
-
-							for ( let j = 0; j < shape.holes.length; j ++ ) {
-
-								const hole = shape.holes[ j ];
-								holeShapes.push( hole );
-
-							}
-
-						}
-
-					}
-
-					shapes.push.apply( shapes, holeShapes );
-
-					const lineText = new THREE.Object3D();
-
-					for ( let i = 0; i < shapes.length; i ++ ) {
-
-						const shape = shapes[ i ];
-
-						const points = shape.getPoints();
-						const geometry = new THREE.BufferGeometry().setFromPoints( points );
-
-						geometry.translate( xMid, 0, 0 );
-
-						const lineMesh = new THREE.Line( geometry, matDark );
-						lineText.add( lineMesh );
-
-					}
-
-					scene.add( lineText );
-
-					render();
-
-				} ); //end load function
-
-}
-
 
 function initOscFreqs(){
 
