@@ -114,15 +114,29 @@ function initScene(){
 	    new THREE.Vector3(0, 3, 10)
 	]);
 
-	xline = new THREE.Line(xline_geometry, xline_material);
-	yline = new THREE.Line(yline_geometry, yline_material);
-	zline = new THREE.Line(zline_geometry, zline_material);
+	//xline = new THREE.Line(xline_geometry, xline_material);
+	//yline = new THREE.Line(yline_geometry, yline_material);
+	//zline = new THREE.Line(zline_geometry, zline_material);
+
+	const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 16, 32 );
+	const materialX = new THREE.MeshBasicMaterial( {color: xColor} );
+	const materialY= new THREE.MeshBasicMaterial( {color: yColor} );
+	const materialZ= new THREE.MeshBasicMaterial( {color: zColor} );
+
+	const xline = new THREE.Mesh( geometry, materialX );
+	const yline = new THREE.Mesh( geometry, materialY );
+	const zline = new THREE.Mesh( geometry, materialZ );
+
+	xline.rotateZ(Math.PI / 2);
+	yline.rotateX(Math.PI / 2)
 
 	let ref_syst = new THREE.Group();
-	// scene.add(ref_syst);
 	ref_syst.add(xline);
 	ref_syst.add(yline);
 	ref_syst.add(zline);
+	ref_syst.position.y = 3;
+	scene.add(ref_syst);
+
 
 	// FLOOR
 	floor = new THREE.Mesh(
@@ -452,9 +466,8 @@ function initGUI(){
 	let gui_oct = panel.__ul.children[0].children[0].children[0].children[3].style.borderLeftColor = '#c24e91';
 	
 	let gui_xaxis = panel.__ul.children[1].children[0].children[0].children[1].style.borderLeftColor = xColor;
-	let gui_yaxis = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = yColor;
-	let gui_zaxis = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = zColor;
-
+	let gui_yaxis = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = zColor;
+	let gui_zaxis = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = yColor;
 
 	// group = new InteractiveGroup(renderer, camera);
 	// scene.add( group );
