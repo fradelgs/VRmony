@@ -43,10 +43,9 @@ let normAmp = 1/Math.pow(SpheresPerEdge, 3); //volume normalization
 let xAxisInterval = 7; //Fifths default
 let yAxisInterval = 4; //Maj.Thirds default
 let zAxisInterval = 10; // min.Seventh default
-let xColor = '#ff0000';
-let yColor = '#00ff00';
-let zColor = '#0000ff';
-
+let xColor = '#8f140e';
+let yColor = '#0e8f1b';
+let zColor = '#0e178f';
 
 
 let intersected = [];
@@ -93,57 +92,32 @@ function initScene(){
     // scene.add(room);
 
 	// REFERENCE SYSTEM
-	const xline_material = new THREE.LineBasicMaterial({color: xColor, linewidth: 10});
-	const yline_material = new THREE.LineBasicMaterial({color: yColor, linewidth: 10});
-	const zline_material = new THREE.LineBasicMaterial({color: zColor, linewidth: 10});
-
-	console.log(xline_material.linewidth);
-
-	const xline_geometry = new THREE.BufferGeometry().setFromPoints([
-		new THREE.Vector3(-10, 3, 0),
-	    new THREE.Vector3(10, 3, 0)
-	]);
-
-	const yline_geometry = new THREE.BufferGeometry().setFromPoints([
-		new THREE.Vector3(0, 0, 0),
-	    new THREE.Vector3(0, 10, 0)
-	]);
-
-	const zline_geometry = new THREE.BufferGeometry().setFromPoints([
-		new THREE.Vector3(0, 3, -10),
-	    new THREE.Vector3(0, 3, 10)
-	]);
-
-	//xline = new THREE.Line(xline_geometry, xline_material);
-	//yline = new THREE.Line(yline_geometry, yline_material);
-	//zline = new THREE.Line(zline_geometry, zline_material);
-
-	const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 16, 32 );
+	const geometryX = new THREE.CylinderGeometry( 0.01, 0.07, 20, 32 );
+	const geometryY = new THREE.CylinderGeometry( 0.07, 0.01, 10, 32 );
+	const geometryZ = new THREE.CylinderGeometry( 0.07, 0.01, 20, 32 );
 	const materialX = new THREE.MeshBasicMaterial( {color: xColor} );
 	const materialY= new THREE.MeshBasicMaterial( {color: yColor} );
 	const materialZ= new THREE.MeshBasicMaterial( {color: zColor} );
 
-	const xline = new THREE.Mesh( geometry, materialX );
-	const yline = new THREE.Mesh( geometry, materialY );
-	const zline = new THREE.Mesh( geometry, materialZ );
+	const xline = new THREE.Mesh( geometryX, materialX );
+	const yline = new THREE.Mesh( geometryY, materialY );
+	const zline = new THREE.Mesh( geometryZ, materialZ );
 
 	xline.rotateZ(Math.PI / 2);
-	yline.rotateX(Math.PI / 2)
+	yline.position.y = 2;
+	zline.rotateX(Math.PI / 2);
 
 	let ref_syst = new THREE.Group();
 	ref_syst.add(xline);
 	ref_syst.add(yline);
 	ref_syst.add(zline);
 	ref_syst.position.y = 3;
-	scene.add(ref_syst);
-
 
 	// FLOOR
 	floor = new THREE.Mesh(
 		new THREE.PlaneGeometry( 16, 16, 2, 2 ).rotateX( -Math.PI / 2 ),
 		new THREE.MeshBasicMaterial( { color: 0x808080, transparent: true, opacity: 0.2 } )
 	);
-	// scene.add( floor );
 
 	// FLOOR MARKER
 	floor_marker = new THREE.Mesh(
@@ -191,23 +165,20 @@ function initScene(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.outputEncoding = THREE.sRGBEncoding;
 	renderer.xr.enabled = true;
-
-	controls = new OrbitControls( camera, renderer.domElement );
-
 	document.body.appendChild( renderer.domElement );
 
     //POINTER MOUSE
+	controls = new OrbitControls( camera, renderer.domElement );
     CLICKED = null;
     pointer= new THREE.Vector2();
 
     document.addEventListener( 'pointerdown', mouseDown, false );
 
-	// SYSTEM - for centering
+	// SYSTEM - for centering wrt the user
 	var system = new THREE.Group();
 	scene.add(system);
 	system.add(ref_syst, room, floor, Lattice);
 	system.position.set(0,0,-6);
-
 
 	// GUI
 	initGUI();
@@ -550,8 +521,8 @@ function initGUI(){
 	let gui_oct = panel.__ul.children[0].children[0].children[0].children[3].style.borderLeftColor = '#c24e91';
 	
 	let gui_xaxis = panel.__ul.children[1].children[0].children[0].children[1].style.borderLeftColor = xColor;
-	let gui_yaxis = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = zColor;
-	let gui_zaxis = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = yColor;
+	let gui_yaxis = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = yColor;
+	let gui_zaxis = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = zColor;
 
 	// group = new InteractiveGroup(renderer, camera);
 	// scene.add( group );
