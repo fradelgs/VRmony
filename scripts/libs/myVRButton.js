@@ -87,7 +87,7 @@ class VRButton{
             currentSession.removeEventListener( 'end', onSessionEnded );
 
             self.stylizeElement( button, true, 20, true );
-            button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>'; 
+            button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i>  <i class="fa-solid fa-headphones"></i>'; 
 
             currentSession = null;
             
@@ -100,9 +100,9 @@ class VRButton{
         button.style.display = '';
         button.style.right = '30px';
         button.style.bottom = '30px';
-        button.style.width = '90px';
+        button.style.width = '80px';
         button.style.cursor = 'pointer';
-        button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>';        
+        button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i>  <i class="fa-solid fa-headphones"></i>';        
 
         button.onmouseenter = function () {
             
@@ -115,7 +115,7 @@ class VRButton{
         button.onmouseleave = function () {
             
             button.style.fontSize = '20px'; 
-            button.innerHTML = (currentSession===null) ? '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>' : '<i class="fa-solid fa-door-open"></i>';
+            button.innerHTML = (currentSession===null) ? '<i class="fa-solid fa-vr-cardboard"></i>  <i class="fa-solid fa-headphones"></i>' : '<i class="fa-solid fa-door-open"></i>';
             
             button.style.opacity = '0.5';
 
