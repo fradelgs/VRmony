@@ -1,4 +1,4 @@
-# **VR-mony**
+# **VR-mony***
 ### A platonic solid love experience.
 <br>
 <p align="center"> <img src="./images/doc/cuball.png" width="70%"></p>
