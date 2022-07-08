@@ -100,9 +100,8 @@ class VRButton{
         button.style.display = '';
         button.style.right = '30px';
         button.style.bottom = '30px';
-        button.style.width = '80px';
+        button.style.width = '90px';
         button.style.cursor = 'pointer';
-        // button.innerHTML = '<i class="fa-solid fa-door-closed"></i>';
         button.innerHTML = '<i class="fa-solid fa-vr-cardboard"></i> <i class="fa-solid fa-headphones"></i>';        
 
         button.onmouseenter = function () {
@@ -154,7 +153,6 @@ class VRButton{
         button.onmouseleave = null;
 
         button.onclick = null;
-
     }
 
     showWebXRNotFound( button ) {

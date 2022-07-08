@@ -1,6 +1,6 @@
 import * as THREE from './libs/three/three.module.js';
 import { BoxLineGeometry } from './libs/three/jsm/BoxLineGeometry.js';
-import { VRButton } from './libs/VRButton.js';
+import { VRButton } from './libs/myVRButton.js';
 import { XRControllerModelFactory } from './libs/three/jsm/XRControllerModelFactory.js';
 import { OrbitControls } from './libs/three/jsm/OrbitControls.js';
 import { GUI } from './libs/three/jsm/dat.gui.module.js';
