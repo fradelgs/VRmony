@@ -8,23 +8,6 @@ html,body {
 	padding: 0;
 }
 
-/* #header {
-	position: absolute;
-	z-index: 5;
-	top: 3vw;
-  	left: 5vw;
-	height: fit-content;
-	width: fit-content;
-	background-color: transparent;
-	color: whitesmoke;
-	font-family: 'Great Vibes', cursive;
-	text-shadow: 3px 3px 2px black;
-	text-align: center;
-	cursor: pointer;
-}
-#title {font-size: 6vw;}
-#subtitle {font-size: 2vw;} */
-
 #overlay {
 	z-index: 2;
 	filter: blur(0px);
@@ -43,7 +26,6 @@ img {
 #book{
 	position: absolute;
 	z-index: 3;
-	/* top: 12vw; */
 	top: 7vw;
 	left: 10vw;
 	height: 35vw;
@@ -55,10 +37,6 @@ img {
 	transition: 1s ease;
 }
 
-#book_text {
-	
-}
-
  .text {
 	display: inline-block;
 	position: absolute;
@@ -66,7 +44,6 @@ img {
 	color: white;
 	font-family: 'Sofia', serif;
   	font-size: 2.5vw;
-  	/* top: 54vw; */
 	top: 30vw;
 	height: fit-content;
 	width: fit-content;

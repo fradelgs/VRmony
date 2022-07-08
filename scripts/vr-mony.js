@@ -10,7 +10,7 @@ import { GUI } from './libs/three/jsm/dat.gui.module.js';
 import { FontLoader } from './libs/three/jsm/loaders/FontLoader.js';
 
 ////////////////////////////////////////////////////////////////////////////////
-// Polyfill provides support for mobile devices and devicec which only support WebVR
+// Polyfill provides support for mobile devices and devices which only support WebVR
 import {QueryArgs} from './libs/query-args.js';
 import WebXRPolyfill from './libs/webxr-polyfill.module.js';
       if (QueryArgs.getBool('usePolyfill', true)) {
@@ -20,7 +20,7 @@ import WebXRPolyfill from './libs/webxr-polyfill.module.js';
 
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
 let controller1, controller2, controllerGrip1, controllerGrip2, line;
-let light1, room, floor_marker, floor, baseReferenceSpace;
+let light1, room, floor, floor_marker, baseReferenceSpace;
 let xline, yline, zline;
 let group;
 let clock = new THREE.Clock();
