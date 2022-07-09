@@ -8,6 +8,9 @@ import { GUI } from './libs/three/jsm/dat.gui.module.js';
 // import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 // import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 import { FontLoader } from './libs/three/jsm/loaders/FontLoader.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js";
+
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js";
 
 ////////////////////////////////////////////////////////////////////////////////
 // Polyfill provides support for mobile devices and devicec which only support WebVR
@@ -16,7 +19,31 @@ import WebXRPolyfill from './libs/webxr-polyfill.module.js';
       if (QueryArgs.getBool('usePolyfill', true)) {
         let polyfill = new WebXRPolyfill();
       }
+
 ///////////////////////////////////////////////////////////////////////////////
+// Your web app's Firebase configuration
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyC4_FWQ_yziLhdMtogr8ind2KefelYPi-8",
+
+    authDomain: "vr-mony-e4edb.firebaseapp.com",
+
+    projectId: "vr-mony-e4edb",
+
+    storageBucket: "vr-mony-e4edb.appspot.com",
+
+    messagingSenderId: "294999275601",
+
+    appId: "1:294999275601:web:a2b2a29cc759344ad0a070"
+
+  };
+
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
 let controller1, controller2, controllerGrip1, controllerGrip2, line;
