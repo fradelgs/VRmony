@@ -498,7 +498,7 @@ function readStateFromDB(value){
 			let object = scene.getObjectByName(sphereName);
 			
 			object.userData[0].MODEL= value;
-			console.log(object.userData[0].MODEL)
+			//console.log(object.userData[0].MODEL)
 			audioRender(object);
 			myRender(object);
 
