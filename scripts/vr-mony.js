@@ -486,9 +486,9 @@ function nonLocalRender(){
 
 };
 
-function readStateFromDB(value){
+function readStateFromDB(){
 
-	var docRef = db.collection("LatticeData").doc('Sphere000');
+	var docRef = db.collection("LatticeData").doc(sphereName);
 	docRef.get().then((doc) => {
 		if (doc.exists) {
 			let value = doc.data().sphereState;
@@ -1011,7 +1011,7 @@ function animate() {
 }
 
 function renderDB(){
-	var docRef = db.collection("LatticeData").doc('Sphere000');
+	var docRef = db.collection("LatticeData").doc(sphereName);
 	docRef.get().then((doc) => {
 		if (doc.exists) {
 			readStateFromDB(doc.data().sphereState);
