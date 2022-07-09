@@ -24,21 +24,24 @@ import WebXRPolyfill from './libs/webxr-polyfill.module.js';
 ///////////////////////////////////////////////////////////////////////////////
 
 // Your web app's Firebase configuration
+
 const firebaseConfig = {
 
-    apiKey: "AIzaSyC4_FWQ_yziLhdMtogr8ind2KefelYPi-8",
+    apiKey: "AIzaSyA0hcLZTFS_yfJDLZQc6jOS6CKDFumKagc",
 
-    authDomain: "vr-mony-e4edb.firebaseapp.com",
+    authDomain: "vr-mony-database.firebaseapp.com",
 
-    projectId: "vr-mony-e4edb",
+    projectId: "vr-mony-database",
 
-    storageBucket: "vr-mony-e4edb.appspot.com",
+    storageBucket: "vr-mony-database.appspot.com",
 
-    messagingSenderId: "294999275601",
+    messagingSenderId: "804712135463",
 
-    appId: "1:294999275601:web:a2b2a29cc759344ad0a070"
+    appId: "1:804712135463:web:2b51ea8d9bb7e093ed8702"
 
   };
+
+
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
@@ -46,7 +49,8 @@ var db = firebase.firestore();
 let dbReadState; // key
 let state = 0; // value
 
-let sphereName = "Sphere000";
+let spheres;
+let SphereName;
 
 function changeStateVar(m){
 	if(m == 0){
@@ -57,9 +61,10 @@ function changeStateVar(m){
 	state = m;
 }
 
-function DBwrite(sphereName, state){
+function DBwrite(name, state){
+	SphereName = name;
 	changeStateVar(state);
-	db.collection("LatticeData").doc(sphereName).set({sphereState: state});
+	db.collection("LatticeData").doc('Spheres').set({name: SphereName, value: state});
 }
 
 
@@ -110,8 +115,8 @@ let intersected = [];
 let sound = [];
 
 let color = {
-	false: '0xffffff',
-	true: '0xff00ff'
+	0: '0xffffff',
+	1: '0xff00ff'
 };
 
 
@@ -237,6 +242,7 @@ function initScene(){
 
 	// GUI
 	initGUI();
+	readStateFromDB();
 
 	loadingFonts();
 
@@ -481,21 +487,24 @@ function Ball(){
 	return ball;
 }
 
-function nonLocalRender(){
-	db.collection("LatticeData").where("Sphere", "==", "CA")
-
-};
-
 function readStateFromDB(){
+	db.collection("LatticeData").doc('Spheres').
+	onSnapshot((doc) => {
+		let key = doc.data().name;
+		let value = doc.data().value;
+		let object = scene.getObjectByName(key);
+		object.userData[0].MODEL= value;
+		console.log(object.userData[0].MODEL)
+		audioRender(object);
+		myRender(object);
+    });
 
-	var docRef = db.collection("LatticeData").doc(sphereName);
+	/*
 	docRef.get().then((doc) => {
 		if (doc.exists) {
-			let value = doc.data().sphereState;
-			if(value==0) value=false;
-			else value=true;
+			let value = doc.data().value;
 
-			let object = scene.getObjectByName(sphereName);
+			let object = scene.getObjectByName(SphereName);
 			
 			object.userData[0].MODEL= value;
 			//console.log(object.userData[0].MODEL)
@@ -508,7 +517,9 @@ function readStateFromDB(){
 		}
 	}).catch((error) => {
 		console.log("Error getting document:", error);
-	});	
+
+	});
+	*/
 }
 
 
@@ -566,8 +577,9 @@ function mouseDown(event) {
 		const id = CLICKED.uuid; //getID of clicked object
 		//console.log(CLICKED.name)
 		//console.log(scene.getObjectByName(CLICKED.name).userData[0].MODEL);
-		sphereName = CLICKED.name;
-		DBwrite(sphereName,state);
+		//console.log(CLICKED.name);
+		SphereName = CLICKED.name;
+		DBwrite(SphereName, state);
 		
 		//nonLocalRender();
 		//DBread(CLICKED.name);
@@ -962,7 +974,6 @@ function buildController( data ) {
 
 }
 
-
 function getIntersections(controller) {
 	var tempMatrix = new THREE.Matrix4();
 	tempMatrix.identity().extractRotation(controller.matrixWorld);
@@ -1010,27 +1021,10 @@ function animate() {
 	controls.update();
 }
 
-function renderDB(){
-	var docRef = db.collection("LatticeData").doc(sphereName);
-	docRef.get().then((doc) => {
-		if (doc.exists) {
-			readStateFromDB(doc.data().sphereState);
-
-		} else {
-			// doc.data() will be undefined in this case 
-			console.log("No such document!");
-		}
-	}).catch((error) => {
-		console.log("Error getting document:", error);
-	});
-}
-
 function render() {
 
-	readStateFromDB();
-
 	const delta = clock.getDelta();
-
+	
 	if ( mixer ) {
 		mixer.update( delta );
 	}
