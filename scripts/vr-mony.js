@@ -8,10 +8,11 @@ import { GUI } from './libs/three/jsm/dat.gui.module.js';
 // import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.16/+esm';
 // import { HTMLMesh } from './libs/three/jsm/HTMLMesh.js';
 import { FontLoader } from './libs/three/jsm/loaders/FontLoader.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js";
 
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js";
-
+//Firebase Firestore Libs
+//import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js";
+//import { getFirestore } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js";
+//import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js"; 
 ////////////////////////////////////////////////////////////////////////////////
 // Polyfill provides support for mobile devices and devices which only support WebVR
 import {QueryArgs} from './libs/query-args.js';
@@ -21,8 +22,8 @@ import WebXRPolyfill from './libs/webxr-polyfill.module.js';
       }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Your web app's Firebase configuration
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
 
     apiKey: "AIzaSyC4_FWQ_yziLhdMtogr8ind2KefelYPi-8",
@@ -39,10 +40,35 @@ const firebaseConfig = {
 
   };
 
-
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+let dbReadState; // key
+let state = 0; // value
+
+let sphereName = "Sphere000";
+
+function changeStateVar(m){
+	if(m == 0){
+		m = 1;
+	} else {
+		m = 0;
+	}
+	state = m;
+}
+
+function DBwrite(sphereName, state){
+	changeStateVar(state);
+	db.collection("LatticeData").doc(sphereName).set({sphereState: state});
+}
+
+
+
+/////////
+
+
+
+
 
 
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
@@ -73,6 +99,8 @@ let zAxisInterval = 10; // min.Seventh default
 let xColor = '#8f140e';
 let yColor = '#0e8f1b';
 let zColor = '#0e178f';
+
+let name = "Sphere";
 
 
 let intersected = [];
@@ -325,6 +353,7 @@ function defBallMatrix(){
 			for(var k = 0; k<SpheresPerEdge; k++){
 				spherePosition = [i*BallDistance, j*BallDistance, k*BallDistance];
 				ball[i][j][k] = Ball();
+				ball[i][j][k].name = name.concat(i, j, k);
 				ball[i][j][k].userData[0] = {MODEL: false, PREVIOUS: false};
 			}
 		}
@@ -452,6 +481,37 @@ function Ball(){
 	return ball;
 }
 
+function nonLocalRender(){
+	db.collection("LatticeData").where("Sphere", "==", "CA")
+
+};
+
+function readStateFromDB(value){
+
+	var docRef = db.collection("LatticeData").doc('Sphere000');
+	docRef.get().then((doc) => {
+		if (doc.exists) {
+			let value = doc.data().sphereState;
+			if(value==0) value=false;
+			else value=true;
+
+			let object = scene.getObjectByName(sphereName);
+			
+			object.userData[0].MODEL= value;
+			console.log(object.userData[0].MODEL)
+			audioRender(object);
+			myRender(object);
+
+		} else {
+			// doc.data() will be undefined in this case 
+			console.log("No such document!");
+		}
+	}).catch((error) => {
+		console.log("Error getting document:", error);
+	});	
+}
+
+
 function changeState(object){
 	if (object.userData[0].MODEL==false) {
 		object.userData[0].MODEL= true;
@@ -504,8 +564,15 @@ function mouseDown(event) {
 		CLICKED = intersects[ 0 ].object; // get clicked object
 
 		const id = CLICKED.uuid; //getID of clicked object
-
-		changeState(CLICKED);
+		//console.log(CLICKED.name)
+		//console.log(scene.getObjectByName(CLICKED.name).userData[0].MODEL);
+		sphereName = CLICKED.name;
+		DBwrite(sphereName,state);
+		
+		//nonLocalRender();
+		//DBread(CLICKED.name);
+		//changeState(DBobjKey, DBobjstate)
+		//changeState(CLICKED);
 	}
 }
 
@@ -943,8 +1010,25 @@ function animate() {
 	controls.update();
 }
 
+function renderDB(){
+	var docRef = db.collection("LatticeData").doc('Sphere000');
+	docRef.get().then((doc) => {
+		if (doc.exists) {
+			readStateFromDB(doc.data().sphereState);
+
+		} else {
+			// doc.data() will be undefined in this case 
+			console.log("No such document!");
+		}
+	}).catch((error) => {
+		console.log("Error getting document:", error);
+	});
+}
 
 function render() {
+
+	readStateFromDB();
+
 	const delta = clock.getDelta();
 
 	if ( mixer ) {
@@ -955,7 +1039,16 @@ function render() {
 
 	intersectObjects(controller1);
     intersectObjects(controller2);
-
+/*
+	db.collection("LatticeData").where("sphereState", "==", 0).
+	onSnapshot((querySnapshot) => {
+        var latticeData = [];
+        querySnapshot.forEach((doc) => {
+            latticeData.push(doc.data().name);
+        });
+        console.log("Current cities in CA: ", latticeData);
+    });
+*/
 	// // TELEPORT - FLOOR INTERSECTION
 	// floor_intersection = undefined;
 
