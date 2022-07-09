@@ -104,6 +104,7 @@ let zAxisInterval = 10; // min.Seventh default
 let xColor = '#8f140e';
 let yColor = '#0e8f1b';
 let zColor = '#0e178f';
+let intervalSymbol = 'V';
 
 let name = "Sphere";
 
@@ -267,10 +268,11 @@ function loadingFonts(){
 						side: THREE.DoubleSide
 					} );
 
-					const message = 'Ciao Fra, elettronica oggi non ACTAM!';
-
-					const shapes = font.generateShapes( message, 0.5 );
-
+					let message = intervalSymbol ;
+					
+					let shapes = font.generateShapes( message, 0.5 );
+					
+					console.log(shapes[0].curves)
 					const geometry = new THREE.ShapeGeometry( shapes );
 
 					geometry.computeBoundingBox();
@@ -282,9 +284,10 @@ function loadingFonts(){
 					// make shape ( N.B. edge view not visible )
 
 					const text = new THREE.Mesh( geometry, matLite );
-					text.position.z = - 150;
+					text.position.z = 0;
+					//scene.remove( text );
 					scene.add( text );
-
+					
 					// make line shape ( N.B. edge view remains visible )
 
 					const holeShapes = [];
@@ -323,10 +326,10 @@ function loadingFonts(){
 						lineText.add( lineMesh );
 
 					}
-
+					//scene.remove( lineText )
 					scene.add( lineText );
 
-					render();
+					//render();
 
 				} ); //end load function
 			}
@@ -661,6 +664,9 @@ function setOctave(octave){
 
 
 function setXaxis(interval){
+	intervalSymbol = interval;
+	console.log(intervalSymbol);
+	loadingFonts();
 	switch (interval) {
 		case 'm II': xAxisInterval = 1;
 			break;
