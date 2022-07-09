@@ -857,7 +857,8 @@ function onSelectEnd(event) {
 	if (intersections.length > 0){
 		var intersection = intersections[ 0 ]; // get the first intersected object
 		var object = intersection.object;
-		changeState(object);
+		SphereName = object.name;
+		DBwrite(SphereName, state);
 	}
 
 	// //TELEPORT
