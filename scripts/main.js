@@ -1,9 +1,6 @@
-type = "text/javascript";
-
-var randomVinyl;
-
 var audio = new Audio('audio/lets-get-it-on.m4a');
 audio.currentTime = 1.55;
+var random_vinyl;
 var vinyl_1 = new Audio('audio/vinyl_needle_1.wav');
 var vinyl_2 = new Audio('audio/vinyl_needle_2.wav');
 var vinyl_3 = new Audio('audio/vinyl_needle_3.wav');
