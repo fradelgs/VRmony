@@ -1,7 +1,7 @@
-# **VR-mony***
+# **VR-mony**
 ### A platonic solid love experience.
 <br>
-<p align="center"> <img src="./images/doc/cuball.png" width="70%"></p>
+<p align="center"> <img src="./images/doc/cuball.png" width="50%"></p>
 
 - [**VR-mony**](#VR-mony)
     - [INTRODUCTION](#introduction)
@@ -23,7 +23,7 @@
 # INTRODUCTION
 This project has been developed for the course "**Advanced Coding Tools and Methodologies**" of the MSc in *Music and Acoustic Engineering* of the *Politecnico di Milano*.
 
-*VR-mony** is a minimalistic abstract cubic space in which the user can interact with spherical synthetic sound sources.
+**VR-mony** is a minimalistic abstract cubic space in which the user can interact with spherical synthetic sound sources.
 
 It is a 3D web-based application accessible both from VR headsets and from PCs.
 <br><br>
