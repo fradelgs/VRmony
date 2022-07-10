@@ -78,7 +78,7 @@ function initScene(){
 	audioCtx = listener.context;
 
     // CAMERA
-    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
+    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight);
     camera.position.set( -8.5, 7 , 1);
     camera.add(listener);
 
