@@ -1,12 +1,16 @@
 var audio = new Audio('audio/lets-get-it-on.m4a');
 audio.currentTime = 1.55;
+audio.volume = 0.2;
+
 var random_vinyl;
-var vinyl_1 = new Audio('audio/vinyl_needle_1.wav');
-var vinyl_2 = new Audio('audio/vinyl_needle_2.wav');
-var vinyl_3 = new Audio('audio/vinyl_needle_3.wav');
-var vinyl_4 = new Audio('audio/vinyl_needle_4.wav');
-var vinyl_5 = new Audio('audio/vinyl_needle_5.wav');
-var vinyl_6 = new Audio('audio/vinyl_needle_6.wav');
+
+var vinyl_1 = new Audio('audio/vinyl_needle_1.mp3');
+var vinyl_2 = new Audio('audio/vinyl_needle_2.mp3');
+var vinyl_3 = new Audio('audio/vinyl_needle_3.mp3');
+var vinyl_4 = new Audio('audio/vinyl_needle_4.mp3');
+var vinyl_5 = new Audio('audio/vinyl_needle_5.mp3');
+var vinyl_6 = new Audio('audio/vinyl_needle_6.mp3');
+
 var vinyl_scratches = new Array(vinyl_1, vinyl_2, vinyl_3, vinyl_4, vinyl_5, vinyl_6);
 
 var book = document.getElementById('book');
