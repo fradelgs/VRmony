@@ -55,7 +55,7 @@ There are just two rules:
 ## **The Room**
 The user is suddenly teleported into a minimalistic tridimensional room with just a bunch of organized spheres, three lines and a user interface.
 
-<p align="center"> <img src="./images/doc/room.png" width="100%"></p>
+<p align="center"> <img src="./images/doc/vrmony_app.png" width="70%"></p>
 <br><br>
 
 ### **Controls**
