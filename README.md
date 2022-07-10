@@ -87,7 +87,7 @@ PLAY : Left click on a sphere to activate or deactivate its sound.
 <br><br>
 
 ### **The Spheres**
-A cube of 3x3x3 spheres is the core of ***VR-mony***.
+A cubic lattice of 3x3x3 spheres is the core of ***VR-mony***.
 
 The glowing sphere at the center of the cube plays the fundamental note while the spheres around it have different notes depending on the direction they are located with respect to the fundamental one.
 
