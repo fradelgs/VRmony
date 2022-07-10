@@ -13,35 +13,25 @@ import { FontLoader } from './libs/three/jsm/loaders/FontLoader.js';
 //import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js";
 //import { getFirestore } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js";
 //import { collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore.js"; 
-////////////////////////////////////////////////////////////////////////////////
-// Polyfill provides support for mobile devices and devices which only support WebVR
+
+// POLYFILL
+// provides support for mobile devices and devices which only support WebVR
 import {QueryArgs} from './libs/query-args.js';
 import WebXRPolyfill from './libs/webxr-polyfill.module.js';
-      if (QueryArgs.getBool('usePolyfill', true)) {
-        let polyfill = new WebXRPolyfill();
-      }
+if (QueryArgs.getBool('usePolyfill', true)) {
+    let polyfill = new WebXRPolyfill();
+}
 
-///////////////////////////////////////////////////////////////////////////////
 
-// Your web app's Firebase configuration
-
+// Firebase configuration
 const firebaseConfig = {
-
     apiKey: "AIzaSyA0hcLZTFS_yfJDLZQc6jOS6CKDFumKagc",
-
     authDomain: "vr-mony-database.firebaseapp.com",
-
     projectId: "vr-mony-database",
-
     storageBucket: "vr-mony-database.appspot.com",
-
     messagingSenderId: "804712135463",
-
     appId: "1:804712135463:web:2b51ea8d9bb7e093ed8702"
-
   };
-
-
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
@@ -52,27 +42,14 @@ let state = 0; // value
 let spheres;
 let SphereName;
 
-function changeStateVar(m){
-	if(m == 0){
-		m = 1;
-	} else {
-		m = 0;
-	}
-	state = m;
-}
 
 function DBwrite(name, state){
+	console.log("Sphere clicked: writing on database ... ")
 	SphereName = name;
-	changeStateVar(state);
+	
 	db.collection("LatticeData").doc('Spheres').set({name: SphereName, value: state});
+	
 }
-
-
-
-/////////
-
-
-
 
 
 
@@ -142,7 +119,9 @@ function initScene(){
 
     // CAMERA
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 100 );
-    camera.position.set( 0, 1.6 , 4);
+    camera.position.set( -8.5, 7 , 1);
+	// camera.up = new THREE.Vector3(0,1,0);
+	// camera.lookAt(new THREE.Vector3(0,3,-3));
     camera.add(listener);
 
     // ROOM
@@ -228,11 +207,14 @@ function initScene(){
 	renderer.xr.enabled = true;
 	document.body.appendChild( renderer.domElement );
 
-    //POINTER MOUSE
+    // CONTROLS
 	controls = new OrbitControls( camera, renderer.domElement );
+	controls.target = new THREE.Vector3(0, 3, -6);
+	controls.update();
+
+	// POINTER
     CLICKED = null;
     pointer= new THREE.Vector2();
-
     document.addEventListener( 'pointerdown', mouseDown, false );
 
 	// SYSTEM - for centering wrt the user
@@ -243,8 +225,8 @@ function initScene(){
 
 	// GUI
 	initGUI();
-	readStateFromDB();
 
+	readStateFromDB();
 	loadingFonts();
 
 	window.addEventListener('resize', onWindowResize, false );
@@ -252,87 +234,67 @@ function initScene(){
 
 function loadingFonts(){
 	const loader = new FontLoader();
-				loader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+	loader.load( 'fonts/helvetiker_regular.typeface.json', function ( font ) {
+		const color = 0x006699;
+		const matDark = new THREE.LineBasicMaterial( {
+			color: color,
+			side: THREE.DoubleSide
+		} );
 
-					const color = 0x006699;
+		const matLite = new THREE.MeshBasicMaterial( {
+			color: color,
+			transparent: true,
+			opacity: 0.4,
+			side: THREE.DoubleSide
+		} );
 
-					const matDark = new THREE.LineBasicMaterial( {
-						color: color,
-						side: THREE.DoubleSide
-					} );
-
-					const matLite = new THREE.MeshBasicMaterial( {
-						color: color,
-						transparent: true,
-						opacity: 0.4,
-						side: THREE.DoubleSide
-					} );
-
-					let message = intervalSymbol ;
+		let message = intervalSymbol ;
 					
-					let shapes = font.generateShapes( message, 0.5 );
+		let shapes = font.generateShapes( message, 0.5 );
+		console.log(shapes[0].curves)
+		const geometry = new THREE.ShapeGeometry( shapes );
+		geometry.computeBoundingBox();
+		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+		geometry.translate( xMid, 0, 0 );
+
+		// make shape ( N.B. edge view not visible )
+		const text = new THREE.Mesh( geometry, matLite );
+		text.position.z = 0;
+		//scene.remove( text );
+		scene.add( text );
 					
-					console.log(shapes[0].curves)
-					const geometry = new THREE.ShapeGeometry( shapes );
-
-					geometry.computeBoundingBox();
-
-					const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-
-					geometry.translate( xMid, 0, 0 );
-
-					// make shape ( N.B. edge view not visible )
-
-					const text = new THREE.Mesh( geometry, matLite );
-					text.position.z = 0;
-					//scene.remove( text );
-					scene.add( text );
-					
-					// make line shape ( N.B. edge view remains visible )
-
-					const holeShapes = [];
-
-					for ( let i = 0; i < shapes.length; i ++ ) {
-
-						const shape = shapes[ i ];
-
-						if ( shape.holes && shape.holes.length > 0 ) {
-
-							for ( let j = 0; j < shape.holes.length; j ++ ) {
-
-								const hole = shape.holes[ j ];
-								holeShapes.push( hole );
-
-							}
-
-						}
-
-					}
-
-					shapes.push.apply( shapes, holeShapes );
-
-					const lineText = new THREE.Object3D();
-
-					for ( let i = 0; i < shapes.length; i ++ ) {
-
-						const shape = shapes[ i ];
-
-						const points = shape.getPoints();
-						const geometry = new THREE.BufferGeometry().setFromPoints( points );
-
-						geometry.translate( xMid, 0, 0 );
-
-						const lineMesh = new THREE.Line( geometry, matDark );
-						lineText.add( lineMesh );
-
-					}
-					//scene.remove( lineText )
-					scene.add( lineText );
-
-					//render();
-
-				} ); //end load function
+		// make line shape ( N.B. edge view remains visible )
+		const holeShapes = [];
+		for ( let i = 0; i < shapes.length; i ++ ) {
+			const shape = shapes[ i ];
+			
+			if ( shape.holes && shape.holes.length > 0 ) {
+				for ( let j = 0; j < shape.holes.length; j ++ ) {
+					const hole = shape.holes[ j ];
+					holeShapes.push( hole );
+				}
 			}
+
+		}
+
+		shapes.push.apply( shapes, holeShapes );
+		const lineText = new THREE.Object3D();
+
+		for ( let i = 0; i < shapes.length; i ++ ) {
+			const shape = shapes[ i ];
+			const points = shape.getPoints();
+			const geometry = new THREE.BufferGeometry().setFromPoints( points );
+			geometry.translate( xMid, 0, 0 );
+			const lineMesh = new THREE.Line( geometry, matDark );
+			lineText.add( lineMesh );
+		}
+		//scene.remove( lineText )
+		scene.add( lineText );
+
+		//render();
+
+	} ); //end load function
+}
 
 function fundGlow(){
 	t = 100 * (1/f0);
@@ -495,9 +457,11 @@ function readStateFromDB(){
 	onSnapshot((doc) => {
 		let key = doc.data().name;
 		let value = doc.data().value;
+		console.log("New data received: ", key, value)
 		let object = scene.getObjectByName(key);
-		object.userData[0].MODEL= value;
-		console.log(object.userData[0].MODEL)
+		object.userData[0].MODEL = value;
+		// console.log('object=', object)
+		// console.log('model=', object.userData[0].MODEL)
 		audioRender(object);
 		myRender(object);
     });
@@ -527,28 +491,17 @@ function readStateFromDB(){
 
 
 function changeState(object){
-	if (object.userData[0].MODEL==false) {
+	if(object.userData[0].MODEL == false){
 		object.userData[0].MODEL= true;
+		state = 1;
 		audioRender(object);
 		myRender(object);
 
-
-		// db.collection("state").doc("counter").set({
-		// 	id_note: object.uuid,
-		// 	value: object.userData[0].MODEL,
-		// 	color: color[object.userData[0].MODEL]
-		// })
-	}
-	else {object.userData[0].MODEL= false;
+	} else {
+		object.userData[0].MODEL= false;
+		state = 0;
 		audioRender(object);
 		myRender(object);
-
-
-		// db.collection("state").doc("counter").set({
-		// 	id_note: object.uuid,
-		// 	value: object.userData[0].MODEL,
-		// 	color: color[object.userData[0].MODEL]
-		// })
 	}
 }
 
@@ -570,24 +523,15 @@ function mouseDown(event) {
 	raycaster.setFromCamera( pointer, camera );
 
     var intersectable = scene.getObjectByName("Lattice", true);
-
     const intersects = raycaster.intersectObjects( intersectable.children, true );
 
 	if ( intersects.length > 0){
-
 		CLICKED = intersects[ 0 ].object; // get clicked object
-
 		const id = CLICKED.uuid; //getID of clicked object
-		//console.log(CLICKED.name)
-		//console.log(scene.getObjectByName(CLICKED.name).userData[0].MODEL);
-		//console.log(CLICKED.name);
 		SphereName = CLICKED.name;
+
+		changeState(CLICKED);
 		DBwrite(SphereName, state);
-		
-		//nonLocalRender();
-		//DBread(CLICKED.name);
-		//changeState(DBobjKey, DBobjstate)
-		//changeState(CLICKED);
 	}
 }
 
@@ -596,7 +540,6 @@ function initGUI(){
 	const panel = new GUI( { width: 500, height: 200});
 	const folder1 = panel.addFolder( 'Sound Generator' );
 	const folder2 = panel.addFolder( 'Axis Interval' );
-
 
 	settings = {
 		'Wave Form': 'sine',
@@ -608,8 +551,6 @@ function initGUI(){
 		'Intonation System': 'Equal Temperament',
 		'SpheresPerEdge': 1,	
 	}
-
-	//folder.add( settings, 'frequency', 20.0, 20000.0, 0.01 ).listen().onChange( setFreq( f0 ));
 
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
