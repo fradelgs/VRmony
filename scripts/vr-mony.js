@@ -805,6 +805,7 @@ function onSelectEnd(event) {
 		var intersection = intersections[ 0 ]; // get the first intersected object
 		var object = intersection.object;
 		SphereName = object.name;
+		changeState(object);
 		DBwrite(SphereName, state);
 	}
 
