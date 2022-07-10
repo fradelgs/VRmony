@@ -134,7 +134,7 @@ A simple user interface allows the user to control the sound generator and the i
 
 <br>
 
-- **OCTAVE:** allows to set the octave of the fundamental frequency from 1 to 6 where $C_3$ is the middle $C$ with $f=262.626 Hz$.
+- **OCTAVE:** allows to set the octave of the fundamental frequency from 1 to 6 where $C_3$ is the middle $C$ with $f \approx 262.626 Hz$.
 <br><br>
 
 - **X-AXIS / Y-AXIS / Z-AXIS:** allow to set the development interval on each axis.
