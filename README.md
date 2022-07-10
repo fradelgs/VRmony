@@ -25,10 +25,10 @@
 
 # **Introduction**
 This project has been developed for the course "**Advanced Coding Tools and Methodologies**" of the MSc in *Music and Acoustic Engineering* of the *Politecnico di Milano*.
-<br>
+
 ***VR-mony*** is a minimal abstract space in which the user can interact with spherical synthetic sound sources.
 <br>
-It is a **3D web-based application** with **positional audio** accessible both from VR headsets and from PCs.
+It is a **VR web application** with **positional audio** and **multiuser option** accessible both from VR headsets and from PCs.
 <br><br>
 
 # **Navigating in VR-mony**
@@ -100,7 +100,7 @@ Default settings generate a cube with a $C_3$ on the fundamental sphere and then
 ### **Reference System**
 Three lines with different colours constitute a reference system with the origin in the center of the fundamental note sphere.
 <br>Each line is thicker on the side where the interval goes toward higher frequencies and it is thinner going towards lower frequencies.
-<br>Line colours match the colours in the GUI<!-- and the setted intervals are reported on the thicker end of each line-->.
+<br>Line colours match the colours in the GUI.
 <br><br>
 
 ### **User Interface**

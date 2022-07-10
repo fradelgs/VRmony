@@ -46,9 +46,7 @@ let SphereName;
 function DBwrite(name, state){
 	console.log("Sphere clicked: writing on database ... ")
 	SphereName = name;
-	
 	db.collection("LatticeData").doc('Spheres').set({name: SphereName, value: state});
-	
 }
 
 
