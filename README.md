@@ -87,7 +87,7 @@ PLAY : Left click on a sphere to activate or deactivate its sound.
 <br><br>
 
 ### **The Spheres**
-A cube of 3x3x3 spheres is the core of ***VR-mony***.
+A cubic lattice of 3x3x3 spheres is the core of ***VR-mony***.
 
 The glowing sphere at the center of the cube plays the fundamental note while the spheres around it have different notes depending on the direction they are located with respect to the fundamental one.
 
@@ -134,7 +134,7 @@ A simple user interface allows the user to control the sound generator and the i
 
 <br>
 
-- **OCTAVE:** allows to set the octave of the fundamental frequency from 1 to 6 where $C_3$ is the middle $C$ with $f=262.626 Hz$.
+- **OCTAVE:** allows to set the octave of the fundamental frequency from 1 to 6 where $C_3$ is the middle $C$ with $f \approx 262.626 Hz$.
 <br><br>
 
 - **X-AXIS / Y-AXIS / Z-AXIS:** allow to set the development interval on each axis.
