@@ -191,8 +191,8 @@ The four-dimensional mathematical representation including **octaves** allows th
 <br><br>
 
 # **Demo Video**
-<a align="center" href="https://www.youtube.com/___" target="_blank">
- <img src="___" alt="VR-mony demo" width="860" height="540" />
+<a align="center" href="https://www.youtube.com/watch?v=q-DwMH9EGBc" target="_blank">
+ <img src="./images/doc/ant_video.png" alt="VR-mony demo" width="860" height="540" />
 </a>
 <br><br>
 
