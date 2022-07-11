@@ -79,9 +79,9 @@ PLAY : Left click on a sphere to activate or deactivate its sound.
 |<img src="./images/doc/enter.png" width="70%">  |  <img src="./images/doc/exit.png" width="70%">|
 </p>
 
-- A 3 DoF device (e.g. smartphones inside a Google Cardboard) can only track rotational movement. This is common in devices which rely exclusively on accelerometer and gyroscope readings to provide tracking. Therefore, the user can rotate the camera around the 3 axes and click by means of a bluetooth controller.
+- A 3 DoF device (e.g. smartphones inside a Google Cardboard) can only track rotational movements. This is common in devices which rely exclusively on accelerometer and gyroscope readings to provide tracking. Therefore, the user can rotate the camera around the 3 axes and click by means of a bluetooth controller.
 
-- A 6 DoF headsets (Oculus Quest, HTC Vive) can track both rotation and translation, enabling precise 1:1 tracking. Therefore, the user can move in the virtual space and use controllers to interact with objects.
+- A 6 DoF headset (e.g. Oculus Quest, HTC Vive) can track both rotation and translation, enabling precise 1:1 tracking. Therefore, the user can move in the virtual space and use controllers to interact with objects.
 <br>
 ☰ Use the hamburger button on the left controller to exit.
 <br><br>
@@ -109,7 +109,7 @@ A simple user interface allows the user to control the sound generator and the i
 
 - **WAVE FORM:** allows to set the wave form of the generated sounds
     <p align="center">
-    
+
     | sine | square | sawtooth | triangle |
     | ---- |:------:|:--------:| --------:|
     </p>
