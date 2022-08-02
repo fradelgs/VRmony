@@ -394,28 +394,39 @@ function mouseDown(event) {
 }
 
 function initGUI(){
+	let switch_arp;
 	const panel = new GUI( { width: 500, height: 200});
 	const folder1 = panel.addFolder( 'Sound Generator' );
-	const folder2 = panel.addFolder( 'Axis Interval' );
+	const folder2 = panel.addFolder( 'Arpeggiator Settings' );
+	const folder3 = panel.addFolder( 'Axes Intervals' );
 
 	settings = {
 		'Wave Form': 'sine',
 		'Fundamental Frequency': 'C',
+		'Octave': 3,
+		'Arp mode ON': false,
+		'Pattern': 'Ascending',
+		'BPM': 120,
+		'Steps': 4,
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',
-		'Octave': 3,	
+
 	}
 
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
 	folder1.add( settings, 'Octave', 1, 6, 1 ).onChange(setOctave);
-	folder2.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
-	folder2.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
-	folder2.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
+	folder1.add( settings, 'Arp mode ON' ).onChange((val) => {setArpeggiator(val, folder2)});
+	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending', 'Random'] ).onChange(setArpeggiator);
+	folder2.add( settings, 'BPM', 45, 180, 15 ).onChange(setArpeggiator);
+	folder2.add( settings, 'Steps', 3, 6, 1).onChange(setArpeggiator);
+	folder3.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
+	folder3.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
+	folder3.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
 
 	folder1.open();
-	folder2.open();
+	folder3.open();
 
 	panel.domElement.style.visibility = 'visible';
 
@@ -423,10 +434,15 @@ function initGUI(){
 	let gui_waveform = panel.__ul.children[0].children[0].children[0].children[1].style.borderLeftColor = '#c24e91';
 	let gui_fundfreq = panel.__ul.children[0].children[0].children[0].children[2].style.borderLeftColor = '#c24e91';
 	let gui_oct = panel.__ul.children[0].children[0].children[0].children[3].style.borderLeftColor = '#c24e91';
-	
-	let gui_xaxis = panel.__ul.children[1].children[0].children[0].children[1].style.borderLeftColor = xColor;
-	let gui_yaxis = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = yColor;
-	let gui_zaxis = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = zColor;
+
+	let gui_arp = panel.__ul.children[0].children[0].children[0].children[4].style.borderLeftColor = 'grey';
+	let gui_pat = panel.__ul.children[1].children[0].children[0].children[1].style.borderLeftColor = 'grey';
+	let gui_bpm = panel.__ul.children[1].children[0].children[0].children[2].style.borderLeftColor = 'grey';
+	let gui_steps = panel.__ul.children[1].children[0].children[0].children[3].style.borderLeftColor = 'grey';
+
+	let gui_xaxis = panel.__ul.children[2].children[0].children[0].children[1].style.borderLeftColor = xColor;
+	let gui_yaxis = panel.__ul.children[2].children[0].children[0].children[2].style.borderLeftColor = yColor;
+	let gui_zaxis = panel.__ul.children[2].children[0].children[0].children[3].style.borderLeftColor = zColor;
 }
 
 function setOctave(octave){
@@ -434,6 +450,15 @@ function setOctave(octave){
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
+}
+
+function setArpeggiator(switch_arp, folder2){
+	if (switch_arp==0){
+		folder2.close();
+	}
+	if (switch_arp==1){
+		folder2.open();
+	}
 }
 
 function setXaxis(interval){
