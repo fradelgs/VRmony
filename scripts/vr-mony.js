@@ -43,6 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
+let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, arp_index = 0;
 let f0 = 32.703; //Lattice Fundamental Frequency
 let Oct = 3;
 let k = 100;
@@ -351,22 +352,81 @@ function readStateFromDB(){
 };
 
 function changeState(object){
+	var lastIndex = object.children.length - 1;
+	let arp_f0 = object.children[lastIndex].source.frequency.value;
+	console.log(arp_f0);
+
 	if(object.userData[0].MODEL == false){
-		object.userData[0].MODEL= true;
+		object.userData[0].MODEL = true;
 		state = 1;
 		audioRender(object);
 		myRender(object);
 	} else {
-		object.userData[0].MODEL= false;
+		object.userData[0].MODEL = false;
 		state = 0;
-		audioRender(object);
+		stopAudioRender(object);
 		myRender(object);
 	}
 }
 
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
-	if(object.children[lastIndex]) object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
+	if(object.children[lastIndex]) {
+
+		//ARPEGGIATOR ON
+		if(switch_arp){
+			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
+			
+			let arp_f0 = object.children[lastIndex].source.frequency.value;
+			let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+
+			function arpeggiator(arp_index){
+				let ms = 1000*60/bpm;	// from bpm to milliseconds
+
+				ArpLoop = setTimeout(function() {
+					
+					switch (pattern) {
+						case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+							break;
+						case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+							break;
+						case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+							break;
+						default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+							break;
+					}
+
+					if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
+					else object.children[lastIndex].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
+					arp_index = ++arp_index % steps; // Increment the index
+					arpeggiator(arp_index);
+				}, ms);//  <--BPM
+			}
+
+			arpeggiator(0);
+		}
+
+		//ARPEGGIATOR OFF
+		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);	
+	}
+}
+
+function stopAudioRender(object){
+	var lastIndex = object.children.length - 1;
+	let arp_f0 = object.children[lastIndex].source.frequency.value;
+
+	if(object.children[lastIndex]) {
+		//ARPEGGIATOR ON
+		if(switch_arp){
+			clearTimeout(ArpLoop);
+			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
+			object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
+			console.log(arp_f0);
+			console.log(object.children[lastIndex].source.frequency.value);
+		} 
+		//ARPEGGIATOR OFF
+		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
+	}
 }
 
 function myRender(object){
@@ -394,7 +454,6 @@ function mouseDown(event) {
 }
 
 function initGUI(){
-	let switch_arp;
 	const panel = new GUI( { width: 500, height: 200});
 	const folder1 = panel.addFolder( 'Sound Generator' );
 	const folder2 = panel.addFolder( 'Arpeggiator Settings' );
@@ -418,9 +477,9 @@ function initGUI(){
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
 	folder1.add( settings, 'Octave', 1, 6, 1 ).onChange(setOctave);
 	folder1.add( settings, 'Arp mode ON' ).onChange((val) => {setArpeggiator(val, folder2)});
-	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending', 'Random'] ).onChange(setArpeggiator);
-	folder2.add( settings, 'BPM', 45, 180, 15 ).onChange(setArpeggiator);
-	folder2.add( settings, 'Steps', 3, 6, 1).onChange(setArpeggiator);
+	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending', 'Random'] ).onChange((val) => {setArpPattern(val)});
+	folder2.add( settings, 'BPM', 60, 400, 5 ).onChange((val) => {setArpBPM(val)});
+	folder2.add( settings, 'Steps', 2, 6, 1).onChange((val) => {setArpSteps(val)});
 	folder3.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
 	folder3.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
 	folder3.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
@@ -452,13 +511,27 @@ function setOctave(octave){
 	fundGlow();
 }
 
-function setArpeggiator(switch_arp, folder2){
-	if (switch_arp==0){
+function setArpeggiator(val, folder2){
+	if (val==0){
+		switch_arp = 0;
 		folder2.close();
 	}
-	if (switch_arp==1){
+	if (val==1){
+		switch_arp = 1;
 		folder2.open();
 	}
+}
+
+function setArpBPM(val){
+	bpm = val;
+}
+
+function setArpSteps(val){
+	steps = val;
+}
+
+function setArpPattern(val){
+	pattern = val;
 }
 
 function setXaxis(interval){
