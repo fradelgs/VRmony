@@ -45,7 +45,7 @@ let ball = new Array(SpheresPerEdge);;
 let audioCtx;
 let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, arp_f0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-let f0 = 32.703; //Lattice Fundamental Frequency
+let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
 let k = 100;
 let t = k * (1/f0);
@@ -379,8 +379,8 @@ function changeState(object){
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
 	console.log("qui: ", object.children[lastIndex].source.frequency.value)
-	initIntonation();
-	initOscFreqs();
+	//initIntonation();
+	//initOscFreqs();
 	if(object.children[lastIndex]) {
 
 		//ARPEGGIATOR ON
@@ -519,6 +519,7 @@ function setOctave(octave){
 	Oct = octave;
 	initIntonation();
 	initOscFreqs();
+	arp_f0 = f0*(Math.pow(2, Oct));
 	fundGlow();
 }
 
@@ -689,7 +690,7 @@ function setf0(fundNote){
 		default: f0 = 65.406;
 			break;
 	}
-
+	arp_f0 = f0*8;
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
