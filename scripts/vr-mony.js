@@ -361,24 +361,26 @@ function readStateFromDB(){
 
 function changeState(object){
 	var lastIndex = object.children.length - 1;
-	arp_f0 = object.children[lastIndex].source.frequency.value;
-	console.log(arp_f0);
-
+	
 	if(object.userData[0].MODEL == false){
 		object.userData[0].MODEL = true;
+		arp_f0 =  object.children[lastIndex].source.frequency.value;
 		state = 1;
-		audioRender(object);
-		myRender(object);
+		
 	} else {
 		object.userData[0].MODEL = false;
+		initIntonation();
+		initOscFreqs();
 		state = 0;
-		stopAudioRender(object);
-		myRender(object);
+		
 	}
 }
 
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
+	console.log("qui: ", object.children[lastIndex].source.frequency.value)
+	initIntonation();
+	initOscFreqs();
 	if(object.children[lastIndex]) {
 
 		//ARPEGGIATOR ON
@@ -419,7 +421,7 @@ function audioRender(object){
 
 function stopAudioRender(object){
 	var lastIndex = object.children.length - 1;
-	let arp_f0 = object.children[lastIndex].source.frequency.value;
+	//arp_f0 = object.children[lastIndex].source.frequency.value;
 
 	if(object.children[lastIndex]) {
 		//ARPEGGIATOR ON
@@ -427,10 +429,10 @@ function stopAudioRender(object){
 			clearTimeout(ArpLoop);
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
 			// object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
-			initIntonation();
-			initOscFreqs();
+			//initIntonation();
+			//initOscFreqs();
 			console.log(arp_f0);
-			console.log(object.children[lastIndex].source.frequency.value);
+			//console.log(object.children[lastIndex].source.frequency.value);
 		}
 		//ARPEGGIATOR OFF
 		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
