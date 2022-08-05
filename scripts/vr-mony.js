@@ -43,7 +43,8 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, arp_index = 0;
+let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, arp_f0;
+let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 32.703; //Lattice Fundamental Frequency
 let Oct = 3;
 let k = 100;
@@ -340,20 +341,27 @@ function readStateFromDB(){
 			console.log("New data received: ", key, value)
 			let object = scene.getObjectByName(key);
 			object.userData[0].MODEL = value;
-			audioRender(object);
-			myRender(object);
-		} else { // doc.data() will be undefined in this case 
+
+			if(object.userData[0].MODEL == false){
+				stopAudioRender(object);
+				myRender(object);
+			} else {
+				audioRender(object);
+				myRender(object);
+			}
+
+		} else { // doc.data() will be undefined in this case
 			console.log("No such document!");
 			doc.catch((error) => {
 				console.log("Error getting document:", error);
 			})
 		}
-	});	
+	});
 };
 
 function changeState(object){
 	var lastIndex = object.children.length - 1;
-	let arp_f0 = object.children[lastIndex].source.frequency.value;
+	arp_f0 = object.children[lastIndex].source.frequency.value;
 	console.log(arp_f0);
 
 	if(object.userData[0].MODEL == false){
@@ -376,15 +384,12 @@ function audioRender(object){
 		//ARPEGGIATOR ON
 		if(switch_arp){
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
-			
-			let arp_f0 = object.children[lastIndex].source.frequency.value;
-			let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 
 			function arpeggiator(arp_index){
 				let ms = 1000*60/bpm;	// from bpm to milliseconds
 
 				ArpLoop = setTimeout(function() {
-					
+
 					switch (pattern) {
 						case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 							break;
@@ -399,6 +404,7 @@ function audioRender(object){
 					if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
 					else object.children[lastIndex].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
 					arp_index = ++arp_index % steps; // Increment the index
+
 					arpeggiator(arp_index);
 				}, ms);//  <--BPM
 			}
@@ -407,7 +413,7 @@ function audioRender(object){
 		}
 
 		//ARPEGGIATOR OFF
-		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);	
+		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
 	}
 }
 
@@ -420,10 +426,12 @@ function stopAudioRender(object){
 		if(switch_arp){
 			clearTimeout(ArpLoop);
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
-			object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
+			// object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
+			initIntonation();
+			initOscFreqs();
 			console.log(arp_f0);
 			console.log(object.children[lastIndex].source.frequency.value);
-		} 
+		}
 		//ARPEGGIATOR OFF
 		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
 	}
@@ -434,6 +442,7 @@ function myRender(object){
 }
 
 function mouseDown(event) {
+
 	// find intersections
 	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -820,7 +829,7 @@ function animate() {
 
 function render() {
 	const delta = clock.getDelta();
-	
+
 	if ( mixer ) {
 		mixer.update( delta );
 	}
