@@ -690,7 +690,7 @@ function setf0(fundNote){
 		default: f0 = 65.406;
 			break;
 	}
-	arp_f0 = f0*8;
+	arp_f0 = f0*Math.pow(2, Oct);
 	initIntonation();
 	initOscFreqs();
 	fundGlow();
