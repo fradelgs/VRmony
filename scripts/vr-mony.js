@@ -43,7 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, arp_f0;
+let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, NonArpLoop, arp_f0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
@@ -366,21 +366,17 @@ function changeState(object){
 		object.userData[0].MODEL = true;
 		arp_f0 =  object.children[lastIndex].source.frequency.value;
 		state = 1;
-		
 	} else {
 		object.userData[0].MODEL = false;
 		initIntonation();
 		initOscFreqs();
 		state = 0;
-		
 	}
 }
 
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
-	console.log("qui: ", object.children[lastIndex].source.frequency.value)
-	//initIntonation();
-	//initOscFreqs();
+
 	if(object.children[lastIndex]) {
 
 		//ARPEGGIATOR ON
@@ -391,23 +387,25 @@ function audioRender(object){
 				let ms = 1000*60/bpm;	// from bpm to milliseconds
 
 				ArpLoop = setTimeout(function() {
+					if(switch_arp){
+						switch (pattern) {
+							case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+								break;
+							case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+								break;
+							case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+								break;
+							default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+								break;
+						}
 
-					switch (pattern) {
-						case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-							break;
-						case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
-							break;
-						case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
-							break;
-						default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-							break;
+						if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
+						else object.children[lastIndex].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
+						arp_index = ++arp_index % steps; // Increment the index
+
+						arpeggiator(arp_index);
 					}
-
-					if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
-					else object.children[lastIndex].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
-					arp_index = ++arp_index % steps; // Increment the index
-
-					arpeggiator(arp_index);
+					else clearTimeout(ArpLoop);
 				}, ms);//  <--BPM
 			}
 
@@ -416,8 +414,10 @@ function audioRender(object){
 
 		//ARPEGGIATOR OFF
 		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
+		
 	}
 }
+
 
 function stopAudioRender(object){
 	var lastIndex = object.children.length - 1;
@@ -428,11 +428,7 @@ function stopAudioRender(object){
 		if(switch_arp){
 			clearTimeout(ArpLoop);
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
-			// object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
-			//initIntonation();
-			//initOscFreqs();
-			console.log(arp_f0);
-			//console.log(object.children[lastIndex].source.frequency.value);
+
 		}
 		//ARPEGGIATOR OFF
 		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
