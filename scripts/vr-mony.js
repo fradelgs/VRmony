@@ -43,7 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let switch_arp = 0, bpm=120, steps=4, pattern='Ascending', ArpLoop, NonArpLoop, arp_f0;
+let switch_arp = 0, bpm=200, steps=6, pattern='Ascending', ArpLoop, NonArpLoop, arp_f0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
@@ -421,14 +421,13 @@ function audioRender(object){
 
 function stopAudioRender(object){
 	var lastIndex = object.children.length - 1;
-	//arp_f0 = object.children[lastIndex].source.frequency.value;
+	// arp_f0 = object.children[lastIndex].source.frequency.value;
 
 	if(object.children[lastIndex]) {
 		//ARPEGGIATOR ON
 		if(switch_arp){
 			clearTimeout(ArpLoop);
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
-
 		}
 		//ARPEGGIATOR OFF
 		else object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
@@ -454,7 +453,6 @@ function mouseDown(event) {
 		CLICKED = intersects[ 0 ].object; // get clicked object
 		const id = CLICKED.uuid; //getID of clicked object
 		SphereName = CLICKED.name;
-
 		changeState(CLICKED);
 		DBwrite(SphereName, state);
 	}
@@ -472,8 +470,8 @@ function initGUI(){
 		'Octave': 3,
 		'Arp mode ON': false,
 		'Pattern': 'Ascending',
-		'BPM': 120,
-		'Steps': 4,
+		'BPM': 200,
+		'Steps': 6,
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',
