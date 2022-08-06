@@ -43,7 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let switch_arp = 0, bpm=200, steps=6, pattern='Ascending', ArpLoop, NonArpLoop, arp_f0;
+let switch_arp = 0, bpm=200, steps=6, pattern='Ascending', ArpLoop, arp_f0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
