@@ -1,4 +1,4 @@
-# <span style="color: #c24e91"> **VR-mony** </span>
+# **VR-mony**
 ### A platonic solid love experience.
 <br>
 <p align="center"> <img src="./images/doc/cuball.png" width="50%"></p>
@@ -21,19 +21,17 @@
 - [Useful Links](#useful-links)
 - [Group Members](#group-members)
 <br>
-<a style="color: #c24e91">
+
 # **Introduction**
-</a>
+
 This project has been developed for the course "**Advanced Coding Tools and Methodologies**" of the MSc in *Music and Acoustic Engineering* of the *Politecnico di Milano*.
 
 ***VR-mony*** is a minimal abstract space in which the user can interact with spherical synthetic sound sources.
 <br>
 It is a **VR web application** with **positional audio** and **multiuser option** accessible both from VR headsets and from PCs.
 <br><br>
-<a style="color: #c24e91"> 
-# **Navigating in VR-mony**
-</a>
 
+# **Navigating in VR-mony**
 The app can be run either by downloading the whole repository and running it with a live server or by clicking on the following link.
 
 <a href="https://fradelgs.github.io/VRmony">**Open VR-mony**</a>
@@ -42,9 +40,8 @@ Remember to switch on the audio of your device and to wear your headphones.
 <br>
 The best way to appreciate the audio-video spaciality of VR-mony is to access the link from the browser of a 6DoF VR headset.
 <br><br>
-<a style="color: #c24e91">
+
 ## **The Book**
-</a>
 The homepage is just a joke.
 If the user knows where to touch, the app will ask him/her/them to play.
 
@@ -55,19 +52,15 @@ There are just two rules:
 <p align="center"> <img src="./images/doc/homepage.png" width="70%"></p>
 
 <br><br>
-<a style="color: #c24e91">
-## **The Room**
-</a>
 
+## **The Room**
 The user is suddenly teleported into a minimalistic tridimensional room with just a bunch of organized spheres, three lines and a user interface.
 
 <p align="center"> <img src="./images/doc/vrmony_app.png" width="70%"></p>
 
 <br><br>
-<a style="color: #c24e91">
-### **Controls**
-</a>
 
+### **Controls**
 **PC** users can move into the space, activate sounds and modify them with a mouse:
 
 PAN/TILT : Hold the left mouse button to rotate in 3D.
@@ -94,10 +87,8 @@ PLAY : Left click on a sphere to activate or deactivate its sound.
 <br>
 ☰ Use the hamburger button on the left controller to exit.
 <br><br>
-<a style="color: #c24e91">
-### **The Spheres**
-</a>
 
+### **The Spheres**
 A cubic lattice of 3x3x3 spheres is the core of ***VR-mony***.
 
 The glowing sphere at the center of the cube plays the fundamental note while the spheres around it have different notes depending on the direction they are located with respect to the fundamental one.
@@ -107,19 +98,15 @@ Default settings generate a cube with a $C_3$ on the fundamental sphere and then
 - y axis: Major Third
 - z axis: minor Seventh
 <br><br>
-<a style="color: #c24e91">
-### **Reference System**
-</a>
 
+### **Reference System**
 Three lines with different colours constitute a reference system with the origin in the center of the fundamental note sphere.
 
 Each line is thicker on the side where the interval goes toward higher frequencies and it is thinner going towards lower frequencies.
 <br>Line colours match the colours in the GUI.
 <br><br>
-<a style="color: #c24e91">
-### **User Interface**
-</a>
 
+### **User Interface**
 A simple user interface allows the user to control the sound generator and the interval on each axis.
 <p align="center"> <img src="./images/doc/gui.png" width="50%"></p>
 
@@ -162,10 +149,8 @@ A simple user interface allows the user to control the sound generator and the i
 </p>
 
 <br><br>
-<a style="color: #c24e91">
-### **Arpeggiator MODE**
-</a>
 
+### **Arpeggiator MODE**
 The "Arp mode" switch activates the arpeggiator and opens the menu folder containing the related settings.
 <p align="center"> <img src="./images/doc/gui_arp.png" width="50%"></p>
 
@@ -186,15 +171,12 @@ When the arpeggiator is ON, the mouse click on each sphere starts a looping arpe
 
 - **STEPS:** allows to set the number of steps of the arpeggio from 2 to 6.
 <br><br>
-<a style="color: #c24e91">
-## **Multi-user Interaction**
-</a>
 
+## **Multi-user Interaction**
 Thanks to an external database on [Firebase](https://firebase.google.com/) it is possible for 2 or more users to access VR-mony at the same time and see and hear the spheres activated by other players in real-time.
 <br><br>
-<a style="color: #c24e91">
+
 # **Music Theory**
-</a>
 An _interval_ is a difference in pitch between two sounds. It may be described as _horizontal_ (or _melodic_) if it refers to successively sounding tones, such as two adjacent pitches in a melody, and _vertical_ (or _harmonic_) if it pertains to simultaneously sounding tones, such as in a chord.
 
 In Western music, intervals are most commonly differences between notes of a diatonic scale and the most common naming scheme for intervals describes two properties of the interval: the quality (perfect, major, minor, augmented, diminished) and number (unison, second, third, etc.).
@@ -203,10 +185,8 @@ The size of an interval between two notes may be measured by the ratio of their 
 
 Most commonly, however, musical instruments are nowadays tuned using a different tuning system, called _**12-tone equal temperament**_. As a consequence, the size of most equal-tempered intervals cannot be expressed by small-integer ratios, although it is very close to the size of the corresponding just intervals. For instance, an equal-tempered fifth has a frequency ratio of $2^{7/12}:1$, approximately equal to $1.498:1$, or $2.997:2$ (very close to $3:2$).
 <br><br>
-<a style="color: #c24e91">
-## **The Tonnetz**
-</a>
 
+## **The Tonnetz**
 In musical tuning and harmony, the _**Tonnetz**_ (German for '_tone network_') is a conceptual lattice diagram representing tonal space first described by _Leonhard Euler_ in 1739. This bidimensional representation is useful to illustrate and analyze chords and their relationships.
 Various visual representations of the Tonnetz can be used to show traditional harmonic relationships in European classical music.
 
@@ -214,12 +194,9 @@ Various visual representations of the Tonnetz can be used to show traditional ha
 <p align="center"> <img src="./images/doc/tonnetz.png" width="60%"></p>
 <figcaption align="center"><i>A modern rendering of the Tonnetz. The A minor triad is in dark blue, the C major triad in dark red.</i>
 </figure>
-
 <br><br>
-<a style="color: #c24e91">
-## **Vogel's Tonnetz**
-</a>
 
+## **Vogel's Tonnetz**
 _**Vogel's Tonnetz**_ is a graphical and mathematical representation of the scale range of _just intonation_, introduced by German music theorist _Martin Vogel_ 1976 in his book _Die Lehre von den Tonbeziehungen_ (English: _On the Relations of Tone_, 1993). The graphical representation is based on _Euler's Tonnetz_, adding a **third dimension** for just sevenths to the two dimensions for just fifths and just thirds.
 The four-dimensional mathematical representation including **octaves** allows the evaluation of the congruency of harmonics of chords depending on the tonal material. It can thus also serve to determine the optimal tonal material for a certain chord.
 
@@ -227,12 +204,9 @@ The four-dimensional mathematical representation including **octaves** allows th
 <p align="center"> <img src="./images/doc/seventh_vogels.png" width="60%"></p>
 <figcaption align="center"><i>Representation of the C Major Seventh quadriad in Vogel's Tonnetz.</i>
 </figure>
-
 <br><br>
-<a style="color: #c24e91">
-# **Implementation**
-</a>
 
+# **Implementation**
 **VR-mony** is developed with _HTML_, _CSS_ and _Javascript_ languages taking advantage of the following libraries and Application Programming Interfaces (API).
 
 - [Web Audio API](https://www.w3.org/TR/webaudio/) is a high-level Web API for processing and synthesizing audio in web applications.
@@ -241,18 +215,14 @@ The four-dimensional mathematical representation including **octaves** allows th
 
 - [WebXR API](https://www.w3.org/TR/webxr/) provides access to input (pose information from headset and controllers) and output (hardware display) capabilities commonly associated with Virtual Reality (VR) and Augmented Reality (AR) devices. It allows you develop and host VR and AR experiences on the web.
 <br><br>
-<a style="color: #c24e91">
+
 #  **Demo Video**
-</a>
 <a align="center" href="https://www.youtube.com/watch?v=q-DwMH9EGBc" target="_blank">
  <img src="./images/doc/ant_video.png" alt="VR-mony demo" />
 </a>
-
 <br><br>
-<a style="color: #c24e91">
-# Useful Links
-</a>
 
+# Useful Links
 - [THREE.js](https://threejs.org/)
 - [WebXR API](https://www.w3.org/TR/webxr/)
 - [Web Audio API](https://www.w3.org/TR/webaudio/)
@@ -263,9 +233,8 @@ The four-dimensional mathematical representation including **octaves** allows th
 - [Euler's Tonnetz](https://en.wikipedia.org/wiki/Tonnetz)
 - [Vogel's Tonnetz](https://en.wikipedia.org/wiki/Vogel%27s_Tonnetz)
 <br><br>
-<a style="color: #c24e91">
-# *Group members*
-</a>
 
+
+# *Group members*
 - Francesca Del Gaudio (francesca.delgaudio@mail.polimi.it)
-- Valerio Maiolo (valerio.maiolo@mail.polimi.it) 
+- Valerio Maiolo (valerio.maiolo@mail.polimi.it)
