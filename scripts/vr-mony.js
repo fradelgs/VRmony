@@ -381,7 +381,7 @@ function audioRender(object){
 
 		//ARPEGGIATOR ON
 		if(switch_arp){
-			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
+			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.3, 0.5);
 
 			function arpeggiator(arp_index){
 				let ms = 1000*60/bpm;	// from bpm to milliseconds
@@ -468,7 +468,7 @@ function initGUI(){
 		'Wave Form': 'sine',
 		'Fundamental Frequency': 'C',
 		'Octave': 3,
-		'Arp mode ON': false,
+		'Arp mode': false,
 		'Pattern': 'Ascending',
 		'BPM': 200,
 		'Steps': 6,
@@ -481,7 +481,7 @@ function initGUI(){
     folder1.add( settings, 'Wave Form', ['sine', 'square', 'sawtooth', 'triangle']).onChange(setWave);
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
 	folder1.add( settings, 'Octave', 1, 6, 1 ).onChange(setOctave);
-	folder1.add( settings, 'Arp mode ON' ).onChange((val) => {setArpeggiator(val, folder2)});
+	folder1.add( settings, 'Arp mode' ).onChange((val) => {setArpeggiator(val, folder2)});
 	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending', 'Random'] ).onChange((val) => {setArpPattern(val)});
 	folder2.add( settings, 'BPM', 60, 400, 5 ).onChange((val) => {setArpBPM(val)});
 	folder2.add( settings, 'Steps', 2, 6, 1).onChange((val) => {setArpSteps(val)});
@@ -518,11 +518,11 @@ function setOctave(octave){
 }
 
 function setArpeggiator(val, folder2){
-	if (val==0){
+	if (val==false){
 		switch_arp = 0;
 		folder2.close();
 	}
-	if (val==1){
+	if (val==true){
 		switch_arp = 1;
 		folder2.open();
 	}
