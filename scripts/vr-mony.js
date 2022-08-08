@@ -43,8 +43,8 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', ArpLoop, arp_f0 = [];
-let notes = [1, 1*Math.pow(2, 4/12), 1*Math.pow(2, 7/12), 1*Math.pow(2, 10/12), 1*Math.pow(2, 13/12), 1*Math.pow(2, 16/12)];
+let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', arp_f0;
+let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
 let k = 100;
@@ -398,15 +398,27 @@ function Arpeggiator(switch_arp){
 	//	console.log(osc.userData[1].Arp, osc.userData[1].freqArp);
 	//console.log(notes)
 
+	function setNotes(){
+		switch (pattern) {
+			case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+				break;
+			case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+				break;
+			case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+				break;
+			default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+				break;
+		}
+	}
+
 
 	function myArpeggiator() {
 		
 		Lattice.children.forEach(osc => {
 		if(osc.userData[1].Arp){
 			arp_f0 = osc.userData[1].freqArp;
-			notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)]
+			setNotes();
 			osc.children[osc.children.length-1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);
-			
 		}
 	})
 		arp_index = ++arp_index % steps;
@@ -419,143 +431,6 @@ function Arpeggiator(switch_arp){
 	else clearInterval(ArpOn);
 
 }
-
-
-	/*
-	Lattice.children.forEach(element => {
-
-		console.log(element.userData[1].Arp)
-		arp_f0 = element.userData[1].freqArp;
-		console.log(element.userData[1].Arp)
-
-		if(element.userData[1].Arp == true)
-		{
-			let ms = 1000*60/bpm;	// from bpm to milliseconds
-			
-			ArpLoop = setTimeout(function() {
-				
-				switch (pattern) {
-					case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-						break;
-					case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
-						break;
-					case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
-						break;
-					default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-						break;
-				}
-
-				if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
-				else {console.log("qui: ", element.children[1])
-				element.children[1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);}
-				//memoryObj[memoryObj.length - 1].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
-				arp_index = ++arp_index % steps; // Increment the index
-			}, ms);//  <--BPM
-
-		}
-	})*/
-
-
-
-	/*
-	while(ARPswitch){
-		function arpeggiator(arp_index){
-			let ms = 1000*60/bpm;	// from bpm to milliseconds
-			
-			ArpLoop = setTimeout(function() {
-				
-				switch (pattern) {
-					case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-						break;
-					case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
-						break;
-					case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
-						break;
-					default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-						break;
-				}
-
-				if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
-				else memoryObj[memoryObj.length - 1].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
-				arp_index = ++arp_index % steps; // Increment the index
-
-				arpeggiator(arp_index);
-			}, ms);//  <--BPM
-		}
-	}
-	*/
-
-
-
-/*
-function audioRender(object){
-	var lastIndex = object.children.length - 1;
-	initIntonation();
-	initOscFreqs();
-	if(object.children[lastIndex]) {
-
-		//ARPEGGIATOR ON
-		if(switch_arp){
-			//object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
-
-			function arpeggiator(arp_index){
-				let ms = 1000*60/bpm;	// from bpm to milliseconds
-				
-				ArpLoop = setTimeout(function() {
-					
-					switch (pattern) {
-						case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-							break;
-						case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
-							break;
-						case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
-							break;
-						default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-							break;
-					}
-
-					if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
-					else memoryObj[memoryObj.length - 1].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
-					arp_index = ++arp_index % steps; // Increment the index
-
-					arpeggiator(arp_index);
-				}, ms);//  <--BPM
-			}
-
-			arpeggiator(0);
-		}
-
-		//ARPEGGIATOR OFF
-		else {
-			clearTimeout(ArpLoop);
-			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.0);
-		}
-	}
-}
-
-
-function stopAudioRender(object){
-	var lastIndex = object.children.length - 1;
-	//arp_f0 = object.children[lastIndex].source.frequency.value;
-
-	if(object.children[lastIndex]) {
-		//ARPEGGIATOR ON
-		if(switch_arp){
-			clearTimeout(ArpLoop);
-			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0);
-			// object.children[lastIndex].source.frequency.setValueAtTime(arp_f0, listener.context.currentTime + 0, 0);
-			//initIntonation();
-			//initOscFreqs();
-			console.log(arp_f0);
-			//console.log(object.children[lastIndex].source.frequency.value);
-		}
-		//ARPEGGIATOR OFF
-		else {
-			clearTimeout(ArpLoop);
-			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
-		}
-	}
-}*/
 
 function myRender(object){
 	object.material.color.setHex( color[object.userData[0].MODEL] );
@@ -606,7 +481,7 @@ function initGUI(){
 	folder1.add( settings, 'Fundamental Frequency', ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] ).onChange(setf0);
 	folder1.add( settings, 'Octave', 1, 6, 1 ).onChange(setOctave);
 	folder1.add( settings, 'Arp mode ON' ).onChange((val) => {setArpeggiator(val, folder2)});
-	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending', 'Random'] ).onChange((val) => {setArpPattern(val)});
+	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending'] ).onChange((val) => {setArpPattern(val)});
 	folder2.add( settings, 'BPM', 60, 1000, 5 ).onChange((val) => {setArpBPM(val)});
 	folder2.add( settings, 'Steps', 1, 6, 1).onChange((val) => {setArpSteps(val)});
 	folder3.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
@@ -660,6 +535,8 @@ function setArpeggiator(val, folder2){
 
 function setArpBPM(val){
 	bpm = val;
+	Arpeggiator(0);
+	Arpeggiator(1);
 }
 
 function setArpSteps(val){
@@ -670,7 +547,7 @@ function setArpPattern(val){
 	pattern = val;
 
 	switch (pattern) {
-		case 'Ascending': notes = [1, 1*Math.pow(2, 4/12), 1*Math.pow(2, 7/12), 1*Math.pow(2, 10/12), 1*Math.pow(2, 13/12), 1*Math.pow(2, 16/12)];
+		case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 			break;
 		case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
 			break;
