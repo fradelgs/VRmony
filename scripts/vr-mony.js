@@ -43,8 +43,8 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let switch_arp = 0, bpm=600, steps=4, pattern='Ascending', ArpLoop, arp_f0;
-let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', ArpLoop, arp_f0 = [];
+let notes = [1, 1*Math.pow(2, 4/12), 1*Math.pow(2, 7/12), 1*Math.pow(2, 10/12), 1*Math.pow(2, 13/12), 1*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
 let k = 100;
@@ -60,8 +60,9 @@ let name = "Sphere";
 let intersected = [];
 let sound = [];
 let color = {0: '0xffffff',	1: '0xff00ff'};
-let memoryObj = [];
+let memoryObj = [], memoryFreq = [];
 let obj;
+let ms;
 
 
 const container = document.createElement( 'div' );
@@ -216,6 +217,7 @@ function defBallMatrix(){
 				ball[i][j][k] = Ball();
 				ball[i][j][k].name = name.concat(i, j, k);
 				ball[i][j][k].userData[0] = {MODEL: false, PREVIOUS: false};
+				ball[i][j][k].userData[1] = {Arp: false, freqArp: 440}
 			}
 		}
 	}
@@ -256,6 +258,7 @@ function initIntonation(){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
 				intonation[i][j][k]=(f0 *(Math.pow(2, Oct) * Math.pow(2, ((i-1)*xAxisInterval)/12)) * Math.pow(2, ((j-1)*yAxisInterval)/12))* Math.pow(2, ((k-1)*zAxisInterval)/12);
+				ball[i][j][k].userData[1].freqArp = intonation[i][j][k];
 			}
 		}
 	}
@@ -268,6 +271,7 @@ function initOscFreqs(){
 		for(var j = 0; j<SpheresPerEdge; j++){
 			for(var k = 0; k<SpheresPerEdge; k++){
 				oscillator[i][j][k].frequency.setValueAtTime(intonation[i][j][k], audioCtx.currentTime);
+
 			}
 		}
 	}
@@ -344,14 +348,9 @@ function readStateFromDB(){
 			obj = scene.getObjectByName(key);
 			obj.userData[0].MODEL = value;
 
-			if(obj.userData[0].MODEL == false){
-				stopAudioRender(obj);
-				myRender(obj);
-			} else {
-				audioRender(obj);
-				myRender(obj);
-			}
-
+			audioRender(obj);
+			myRender(obj);
+			
 		} else { // doc.data() will be undefined in this case
 			console.log("No such document!");
 			doc.catch((error) => {
@@ -366,20 +365,129 @@ function changeState(object){
 	
 	if(object.userData[0].MODEL == false){
 		object.userData[0].MODEL = true;
-		arp_f0 =  object.children[lastIndex].source.frequency.value;
+
+		if(switch_arp==true)
+			object.userData[1].Arp = true;
 		state = 1;
-		memoryObj.push(object.children[lastIndex]);
-		
+
 	} else {
 		object.userData[0].MODEL = false;
-		initIntonation();
-		initOscFreqs();
-		memoryObj.pop();
+		object.userData[1].Arp = false;
+		//initIntonation();
+		//initOscFreqs();
 		
 		state = 0;
 	}
 }
 
+function audioRender(object){
+	var lastIndex = object.children.length - 1;
+	if(object.children[lastIndex]) {
+		object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
+	}
+	else {
+		object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
+	}
+}
+
+function Arpeggiator(switch_arp){
+
+	let arp_index=1;
+	ms = 1000*60/bpm;	// from bpm to milliseconds
+
+	//	console.log(osc.userData[1].Arp, osc.userData[1].freqArp);
+	//console.log(notes)
+
+
+	function myArpeggiator() {
+		
+		Lattice.children.forEach(osc => {
+		if(osc.userData[1].Arp){
+			arp_f0 = osc.userData[1].freqArp;
+			notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)]
+			osc.children[osc.children.length-1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);
+			
+		}
+	})
+		arp_index = ++arp_index % steps;
+	}
+
+	if(switch_arp){
+		ArpOn = setInterval(
+			myArpeggiator , ms);
+		}
+	else clearInterval(ArpOn);
+
+}
+
+
+	/*
+	Lattice.children.forEach(element => {
+
+		console.log(element.userData[1].Arp)
+		arp_f0 = element.userData[1].freqArp;
+		console.log(element.userData[1].Arp)
+
+		if(element.userData[1].Arp == true)
+		{
+			let ms = 1000*60/bpm;	// from bpm to milliseconds
+			
+			ArpLoop = setTimeout(function() {
+				
+				switch (pattern) {
+					case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+						break;
+					case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+						break;
+					case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+						break;
+					default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+						break;
+				}
+
+				if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
+				else {console.log("qui: ", element.children[1])
+				element.children[1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);}
+				//memoryObj[memoryObj.length - 1].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
+				arp_index = ++arp_index % steps; // Increment the index
+			}, ms);//  <--BPM
+
+		}
+	})*/
+
+
+
+	/*
+	while(ARPswitch){
+		function arpeggiator(arp_index){
+			let ms = 1000*60/bpm;	// from bpm to milliseconds
+			
+			ArpLoop = setTimeout(function() {
+				
+				switch (pattern) {
+					case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+						break;
+					case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+						break;
+					case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+						break;
+					default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+						break;
+				}
+
+				if (pattern=='Random') object.children[lastIndex].source.frequency.setValueAtTime(notes[(Math.floor(Math.random()*notes.length))%steps], audioCtx.currentTime);
+				else memoryObj[memoryObj.length - 1].source.frequency.setValueAtTime(notes[arp_index%steps], audioCtx.currentTime);
+				arp_index = ++arp_index % steps; // Increment the index
+
+				arpeggiator(arp_index);
+			}, ms);//  <--BPM
+		}
+	}
+	*/
+
+
+
+/*
 function audioRender(object){
 	var lastIndex = object.children.length - 1;
 	initIntonation();
@@ -388,27 +496,13 @@ function audioRender(object){
 
 		//ARPEGGIATOR ON
 		if(switch_arp){
-			console.log(object.children[lastIndex])
-			console.log("memory: ", memoryObj[memoryObj.length-1].source.frequency)
-			console.log("memoryArr", memoryObj)
-			Lattice.children.forEach(element => {
-				element.userData[0]==false;
-			}
-				);
 			//object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
-			memoryObj.forEach(osc => {
-				osc.gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime, 0.0);
-			})
-			
-			/*memoryObj.forEach(osc => {
-				osc.gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0.1, 0.5);
-			});*/
 
 			function arpeggiator(arp_index){
 				let ms = 1000*60/bpm;	// from bpm to milliseconds
 				
 				ArpLoop = setTimeout(function() {
-
+					
 					switch (pattern) {
 						case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 							break;
@@ -439,6 +533,7 @@ function audioRender(object){
 	}
 }
 
+
 function stopAudioRender(object){
 	var lastIndex = object.children.length - 1;
 	//arp_f0 = object.children[lastIndex].source.frequency.value;
@@ -460,7 +555,7 @@ function stopAudioRender(object){
 			object.children[lastIndex].gain.gain.setTargetAtTime(object.userData[0].MODEL*normAmp*8, listener.context.currentTime + 0, 0.5);
 		}
 	}
-}
+}*/
 
 function myRender(object){
 	object.material.color.setHex( color[object.userData[0].MODEL] );
@@ -542,22 +637,23 @@ function setOctave(octave){
 	Oct = octave;
 	initIntonation();
 	initOscFreqs();
-	arp_f0 = f0*(Math.pow(2, Oct));
 	fundGlow();
 }
 
 function setArpeggiator(val, folder2){
-	if (val==0){
-		switch_arp = 0;
+	switch_arp = val;
+	console.log("sono switcharp: ", switch_arp)
+
+	if (switch_arp == false){
+		Arpeggiator(switch_arp);
 		initIntonation();
 		initOscFreqs();
-		clearTimeout(ArpLoop)
-		stopAudioRender(obj);
+		//clearTimeout(ArpLoop)
+		//stopAudioRender(obj);
 		folder2.close();
 	}
-	if (val==1){
-		switch_arp = 1;
-		audioRender(obj);
+	if (switch_arp == true){
+		Arpeggiator(switch_arp);
 		folder2.open();
 	}
 }
@@ -572,6 +668,17 @@ function setArpSteps(val){
 
 function setArpPattern(val){
 	pattern = val;
+
+	switch (pattern) {
+		case 'Ascending': notes = [1, 1*Math.pow(2, 4/12), 1*Math.pow(2, 7/12), 1*Math.pow(2, 10/12), 1*Math.pow(2, 13/12), 1*Math.pow(2, 16/12)];
+			break;
+		case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
+			break;
+		case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
+			break;
+		default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+			break;
+	}
 }
 
 function setXaxis(interval){
