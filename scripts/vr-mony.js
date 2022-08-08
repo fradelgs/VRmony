@@ -517,7 +517,6 @@ function setOctave(octave){
 
 function setArpeggiator(val, folder2){
 	switch_arp = val;
-	console.log("sono switcharp: ", switch_arp)
 
 	if (switch_arp == false){
 		Arpeggiator(switch_arp);
