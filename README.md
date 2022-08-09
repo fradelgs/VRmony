@@ -160,8 +160,8 @@ When the arpeggiator is ON, the mouse click on each sphere starts a looping arpe
 - **PATTERN:** selects the way the arpeggiator picks the notes into an array
 <p align="center">
 
-| Ascending  | Descending | Ascending+Descending | Random |
-|:---------- | ----------:|:--------------------:| ------:|
+| Ascending  | Descending | Ascending+Descending |
+|:---------- | ----------:| --------------------:|
 
 </p>
 <br>
