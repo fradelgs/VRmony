@@ -29,7 +29,7 @@ var db = firebase.firestore();
 let state = 0; // value
 
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
-let controller1, controller2, controllerGrip1, controllerGrip2, line;
+let controller1, controller2, controllerGrip1, controllerGrip2;
 let light1, room, floor, floor_marker;
 let clock = new THREE.Clock();
 let settings;
@@ -43,7 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', arp_f0, arp_index=1, count = 0, temp = 0;
+let ArpOn, switch_arp = 0, bpm=300, steps=5, pattern='Ascending', arp_f0, arp_index=1, count = 0, temp = 0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
@@ -60,7 +60,6 @@ let name = "Sphere";
 let intersected = [];
 let sound = [];
 let color = {0: '0xffffff',	1: '0xff00ff'};
-let memoryObj = [], memoryFreq = [];
 let obj;
 let ms;
 
@@ -426,17 +425,6 @@ function Arpeggiator(switch_arp){
 
 	function setNotes(){
 		notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-		
-		/*switch (pattern) {
-			case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-				break;
-			case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
-				break;
-			case 'Ascending + Descending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 4/12)];
-				break;
-			default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
-				break;
-		}*/
 	}
 
 	function myArpeggiator() {
@@ -499,8 +487,8 @@ function initGUI(){
 		'Octave': 3,
 		'Arp mode ON': false,
 		'Pattern': 'Ascending',
-		'BPM': 600,
-		'Steps': 4,
+		'BPM': 300,
+		'Steps': 5,
 		'x-axis': 'V' ,
 		'y-axis': 'M III',
 		'z-axis': 'm VII',

@@ -107,7 +107,7 @@ Each line is thicker on the side where the interval goes toward higher frequenci
 <br><br>
 
 ### **User Interface**
-A simple user interface allows the user to control the sound generator and the interval on each axis.
+A simple user interface allows the user to control the sound generator, the intervals on each axis and the arpeggiator mode settings.
 <p align="center"> <img src="./images/doc/gui.png" width="50%"></p>
 
 - **WAVE FORM:** allows to set the wave form of the generated sounds
@@ -154,19 +154,19 @@ A simple user interface allows the user to control the sound generator and the i
 The "Arp mode" switch activates the arpeggiator and opens the menu folder containing the related settings.
 <p align="center"> <img src="./images/doc/gui_arp.png" width="50%"></p>
 
-When the arpeggiator is ON, the mouse click on each sphere starts a looping arpeggio using the note of the clicked sphere as the tonic and it is possible to customize on the go the sequence of notes played and its speed with the following options:
+When the arpeggiator is ON, the mouse click on each sphere starts a looping arpeggio using the note of the clicked sphere as the tonic and it is possible to customize on the go not only the sound generator and the axes intervals, but also the sequence of notes played and its speed with the following options:
 <br><br>
 
 - **PATTERN:** selects the way the arpeggiator picks the notes into an array
 <p align="center">
 
-| Ascending  | Descending | Ascending+Descending | Random |
-|:---------- | ----------:|:--------------------:| ------:|
+| Ascending  | Descending | Ascending+Descending |
+|:---------- | ----------:| --------------------:|
 
 </p>
 <br>
 
-- **BPM:** allows to set the BPM of the arpeggiator from 60 to 400 bpm.
+- **BPM:** allows to set the BPM of the arpeggiator from 60 to 1000 bpm.
 <br>
 
 - **STEPS:** allows to set the number of steps of the arpeggio from 2 to 6.
