@@ -43,7 +43,7 @@ let intonation = new Array(SpheresPerEdge);
 let mixer;
 let ball = new Array(SpheresPerEdge);;
 let audioCtx;
-let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', arp_f0;
+let ArpOn, switch_arp = 0, bpm=600, steps=4, pattern='Ascending', arp_f0, arp_index=1, count = 0, temp = 0;
 let notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 let f0 = 65.406; //Lattice Fundamental Frequency
 let Oct = 3;
@@ -288,7 +288,6 @@ function initSoundLattice(){
 				oscillator[i][j][k]= audioCtx.createOscillator()
 				oscillator[i][j][k].type = 'sine';
 				oscillator[i][j][k].frequency.setValueAtTime(intonation[i][j][k], audioCtx.currentTime);
-				oscillator[i][j][k].start(0);
 				sound[i][j][k] = new THREE.PositionalAudio( listener );
 				sound[i][j][k].setNodeSource(oscillator[i][j][k]);
 				sound[i][j][k].setVolume(0.0);
@@ -299,6 +298,16 @@ function initSoundLattice(){
 			}
 		}
 	}
+	
+	//toglie il glitch all'avvio. ok anche con 0 ms.
+	setTimeout(() => {
+		for(var i = 0; i< SpheresPerEdge; i++){
+			for(var j = 0; j< SpheresPerEdge; j++){
+				for(var k = 0; k< SpheresPerEdge; k++){
+		oscillator[i][j][k].start(0);}}}
+	}, 10);
+
+	
 }
 
 function SoundVisualPatching(){
@@ -366,7 +375,7 @@ function changeState(object){
 	if(object.userData[0].MODEL == false){
 		object.userData[0].MODEL = true;
 
-		if(switch_arp==true)
+		//if(switch_arp==true)
 			object.userData[1].Arp = true;
 		state = 1;
 
@@ -390,16 +399,35 @@ function audioRender(object){
 	}
 }
 
+function upatedIndex(){
+
+	switch (pattern) {
+		case 'Ascending':
+			arp_index = ++arp_index % steps;
+			break;
+
+		case 'Descending':
+			arp_index = arp_index != 0 ? --arp_index : (steps-1);
+			break;
+		
+		case 'Ascending + Descending':
+			count = ++count % steps;
+			if(count==(steps-1)) {temp = !temp; count = 0;};
+			if(temp == 0) arp_index = ++arp_index % steps;
+			else arp_index = arp_index != 0 ? --arp_index : steps;
+	}
+}
+
 function Arpeggiator(switch_arp){
 
-	let arp_index=1;
 	ms = 1000*60/bpm;	// from bpm to milliseconds
-
 	//	console.log(osc.userData[1].Arp, osc.userData[1].freqArp);
 	//console.log(notes)
 
 	function setNotes(){
-		switch (pattern) {
+		notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
+		
+		/*switch (pattern) {
 			case 'Ascending': notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 				break;
 			case 'Descending': notes = [arp_f0, arp_f0/Math.pow(2, 4/12), arp_f0/Math.pow(2, 7/12), arp_f0/Math.pow(2, 10/12), arp_f0/Math.pow(2, 13/12), arp_f0/Math.pow(2, 16/12)];
@@ -408,20 +436,22 @@ function Arpeggiator(switch_arp){
 				break;
 			default: notes = [arp_f0, arp_f0*Math.pow(2, 4/12), arp_f0*Math.pow(2, 7/12), arp_f0*Math.pow(2, 10/12), arp_f0*Math.pow(2, 13/12), arp_f0*Math.pow(2, 16/12)];
 				break;
-		}
+		}*/
 	}
-
 
 	function myArpeggiator() {
 		
 		Lattice.children.forEach(osc => {
 		if(osc.userData[1].Arp){
+			
 			arp_f0 = osc.userData[1].freqArp;
 			setNotes();
 			osc.children[osc.children.length-1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);
 		}
 	})
-		arp_index = ++arp_index % steps;
+
+	upatedIndex();
+		
 	}
 
 	if(switch_arp){
