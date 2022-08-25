@@ -410,10 +410,16 @@ function upatedIndex(){
 			break;
 		
 		case 'Ascending + Descending':
-			count = ++count % steps;
-			if(count==(steps-1)) {temp = !temp; count = 0;};
-			if(temp == 0) arp_index = ++arp_index % steps;
-			else arp_index = arp_index != 0 ? --arp_index : steps;
+
+			let indexArr  = Array.from(Array(steps).keys())
+			let reverseArr = Array.from(Array(steps).keys()).reverse();
+			reverseArr.shift();
+			reverseArr.pop(); 
+			let AscDesc = indexArr.concat(reverseArr);
+			count = ++count % (2*(steps-1));
+			arp_index = AscDesc[count];
+			console.log("sono arp_index: " + arp_index)
+			
 	}
 }
 
@@ -434,7 +440,7 @@ function Arpeggiator(switch_arp){
 			
 			arp_f0 = osc.userData[1].freqArp;
 			setNotes();
-			osc.children[osc.children.length-1].source.frequency.setValueAtTime(notes[arp_index%steps], listener.context.currentTime + 0, 0);
+			osc.children[osc.children.length-1].source.frequency.setValueAtTime(notes[arp_index], listener.context.currentTime + 0, 0);
 		}
 	})
 
@@ -501,7 +507,7 @@ function initGUI(){
 	folder1.add( settings, 'Arp mode ON' ).onChange((val) => {setArpeggiator(val, folder2)});
 	folder2.add( settings, 'Pattern', ['Ascending', 'Descending', 'Ascending + Descending'] ).onChange((val) => {setArpPattern(val)});
 	folder2.add( settings, 'BPM', 60, 1000, 5 ).onChange((val) => {setArpBPM(val)});
-	folder2.add( settings, 'Steps', 1, 6, 1).onChange((val) => {setArpSteps(val)});
+	folder2.add( settings, 'Steps', 2, 6, 1).onChange((val) => {setArpSteps(val)});
 	folder3.add( settings, 'x-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setXaxis);
 	folder3.add( settings, 'y-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setYaxis);
 	folder3.add( settings, 'z-axis', ['m II', 'M II', 'm III', 'M III','IV', 'm V', 'V', 'm VI', 'M VI', 'm VII', 'M VII', 'VIII']).onChange(setZaxis);
