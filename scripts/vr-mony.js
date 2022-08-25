@@ -418,7 +418,7 @@ function upatedIndex(){
 			let AscDesc = indexArr.concat(reverseArr);
 			count = ++count % (2*(steps-1));
 			arp_index = AscDesc[count];
-			console.log("sono arp_index: " + arp_index)
+			break;
 			
 	}
 }
