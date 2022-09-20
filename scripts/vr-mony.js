@@ -29,7 +29,7 @@ var db = firebase.firestore();
 let state = 0; // value
 
 let camera, listener, scene, raycaster, renderer, controls, pointer, CLICKED;
-let controller1, controller2, controllerGrip1, controllerGrip2;
+let controller1, controller2, controllerGrip1, controllerGrip2, line;
 let light1, room, floor, floor_marker;
 let clock = new THREE.Clock();
 let settings;
